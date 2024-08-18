@@ -2,7 +2,7 @@
 #define __OFFSETS_H__
 #pragma once
 
-// 9.60
+// 9.50 - 9.51
 #define XFAST_SYSCALL_addr              0x000001C0
 
 // Names - Data
@@ -71,7 +71,7 @@
 #define vm_map_protect_check            0x00196D3B
 
 // flatz allow mangled symbol in dynlib_do_dlsym
-#define dynlib_do_dlsym_patch           0x001BC1A7
+#define dynlib_do_dlsym_patch           0x00000F0C7
 
 // Enable mount for unprivileged user
 #define enable_mount_patch              0x001BFD07

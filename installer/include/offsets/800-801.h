@@ -34,10 +34,56 @@
 // patch sys_mmap to allow rwx mappings
 #define sys_mmap_patch                  0x000FD03A
 
-// disable some check for mmap
+// Patch setuid: Don't run kernel exploit more than once/privilege escalation
+#define enable_setuid_patch             0x0034D68F
+
+// Enable RWX (kmem_alloc) mapping
+#define kmem_alloc_patch1               0x001B4BC
+#define kmem_alloc_patch2               0x001B4C4
+
+// Patch copyin/copyout: Allow userland + kernel addresses in both params
+// copyin
+#define enable_copyin_patch1            0x0025E407
+#define enable_copyin_patch2            0x0025E413
+// copyout
+#define enable_copyout_patch1           0x0025E312
+#define enable_copyout_patch2           0x0025E31E
+
+// Patch copyinstr
+#define enable_copyinstr_patch1         0x0025E8B3
+#define enable_copyinstr_patch2         0x0025E8BF
+#define enable_copyinstr_patch3         0x0025E8F0
+
+// Patch memcpy stack
+#define enable_memcpy_patch             0x0025E1CD
+
+// ptrace patches
+#define enable_ptrace_patch1            0x0017416D
+#define enable_ptrace_patch2            0x0017462F
+
+// setlogin patch (for autolaunch check)
+#define enable_setlogin_patch           0x0035034C
+
+// Patch to remove vm_fault: fault on nofault entry, addr %llx
+#define enable_vmfault_patch            0x0011EB86
+
+// Patch mprotect: Allow RWX (mprotect) mapping
 #define vm_map_protect_check            0x003EC68B
 
-// enable debug log
+// flatz allow mangled symbol in dynlib_do_dlsym
+#define dynlib_do_dlsym_patch           0x00092927
+
+// Enable mount for unprivileged user
+#define enable_mount_patch              0x003316C7
+
+// patch suword_lwpid
+// has a check to see if child_tid/parent_tid is in kernel memory, and it in so patch it
+// Patch by: JOGolden
+#define enable_suword_patch1            0x0025E6D2
+#define enable_suword_patch2            0x0025E6E1
+
+// Enable *all* debugging logs (in vprintf)
+// Patch by: SiSTRo
 #define enable_debug_log_patch          0x00430BC7
 
 // enable uart output

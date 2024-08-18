@@ -32,18 +32,125 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	uint64_t cr0 = readCr0();
 	writeCr0(cr0 & ~X86_CR0_WP);
 
-	// Patch debug setting errors
-	kmem = (uint8_t *)&kernel_base[debug_menu_error_patch1];
+	// Enable UART
+	kmem = (uint8_t *)&kernel_base[enable_uart_patch];
 	kmem[0] = 0x00;
 	kmem[1] = 0x00;
 	kmem[2] = 0x00;
 	kmem[3] = 0x00;
 
-	kmem = (uint8_t *)&kernel_base[debug_menu_error_patch2];
-	kmem[0] = 0x00;
+        //flatz Patch sys_dynlib_dlsym: Allow from anywhere
+	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch1];
+	kmem[0] = 0xEB;
+	kmem[1] = 0x4C;
+
+	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch2];
+	kmem[0] = 0x31;
+	kmem[1] = 0xC0;
+	kmem[2] = 0xC3;
+
+	// Patch sys_mmap: Allow RWX (read-write-execute) mapping
+	kmem = (uint8_t *)&kernel_base[sys_mmap_patch];
+	kmem[0] = 0x37;
+	kmem[3] = 0x37;
+
+	// Patch setuid: Don't run kernel exploit more than once/privilege escalation
+	kmem = (uint8_t *)&kernel_base[enable_setuid_patch];
+	kmem[0] = 0xB8;
 	kmem[1] = 0x00;
 	kmem[2] = 0x00;
 	kmem[3] = 0x00;
+	kmem[4] = 0x00;
+
+	// Enable RWX (kmem_alloc) mapping
+	kmem = (uint8_t *)&kernel_base[kmem_alloc_patch1];
+	kmem[0] = 0x07;
+
+	kmem = (uint8_t *)&kernel_base[kmem_alloc_patch2];
+	kmem[0] = 0x07;
+
+	// Patch copyin/copyout: Allow userland + kernel addresses in both params
+	// copyin
+	kmem = (uint8_t *)&kernel_base[enable_copyin_patch1];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+
+	kmem = (uint8_t *)&kernel_base[enable_copyin_patch2];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+
+	// copyout
+	kmem = (uint8_t *)&kernel_base[enable_copyout_patch1];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+
+	kmem = (uint8_t *)&kernel_base[enable_copyout_patch2];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+
+	// Patch copyinstr
+	kmem = (uint8_t *)&kernel_base[enable_copyinstr_patch1];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+
+	kmem = (uint8_t *)&kernel_base[enable_copyinstr_patch2];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+
+	kmem = (uint8_t *)&kernel_base[enable_copyinstr_patch3];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+
+	// Patch memcpy stack
+	kmem = (uint8_t *)&kernel_base[enable_memcpy_patch];
+	kmem[0] = 0xEB;
+
+	// ptrace patches
+	kmem = (uint8_t*)&kernel_base[enable_ptrace_patch1];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+	kmem[3] = 0x90;
+	kmem[4] = 0x90;
+	kmem[5] = 0x90;
+
+	// second ptrace patch
+	// via DeathRGH
+	kmem = (uint8_t *)&kernel_base[enable_ptrace_patch2];
+	kmem[0] = 0xE9;
+	kmem[1] = 0x7C;
+	kmem[2] = 0x02;
+	kmem[3] = 0x00;
+	kmem[4] = 0x00;
+
+	// setlogin patch (for autolaunch check)
+	kmem = (uint8_t *)&kernel_base[enable_setlogin_patch];
+	kmem[0] = 0x48;
+	kmem[1] = 0x31;
+	kmem[2] = 0xC0;
+	kmem[3] = 0x90;
+	kmem[4] = 0x90;
+
+	// Patch to remove vm_fault: fault on nofault entry, addr %llx
+	kmem = (uint8_t *)&kernel_base[enable_vmfault_patch];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+	kmem[3] = 0x90;
+	kmem[4] = 0x90;
+	kmem[5] = 0x90;
+
+	// Patch mprotect: Allow RWX (mprotect) mapping
+	kmem = (uint8_t *)&kernel_base[vm_map_protect_check];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+	kmem[3] = 0x90;
+	kmem[4] = 0x90;
+	kmem[5] = 0x90;
 
 	// flatz disable pfs signature check
 	kmem = (uint8_t *)&kernel_base[disable_signature_check_patch];
@@ -62,36 +169,55 @@ int install_payload(struct thread *td, struct install_payload_args* args)
 	kmem[1] = 0x01;
 	kmem[2] = 0xC3;
 
-        //flatz Patch sys_dynlib_dlsym: Allow from anywhere
-	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch1];
-	kmem[0] = 0xEB;
-	kmem[1] = 0x4C;
-
-	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch2];
-	kmem[0] = 0x31;
-	kmem[1] = 0xC0;
-	kmem[2] = 0xC3;
-
-	// Patch sys_mmap: Allow RWX (read-write-execute) mapping
-	kmem = (uint8_t *)&kernel_base[sys_mmap_patch];
-	kmem[0] = 0x37;
-	kmem[3] = 0x37;
-
 	// Enable *all* debugging logs (in vprintf)
 	// Patch by: SiSTRo
 	kmem = (uint8_t *)&kernel_base[enable_debug_log_patch];
 	kmem[0] = 0xEB;
 	kmem[1] = 0x3B;
 
-	// Enable UART
-	kmem = (uint8_t *)&kernel_base[enable_uart_patch];
+	// flatz allow mangled symbol in dynlib_do_dlsym
+	kmem = (uint8_t *)&kernel_base[dynlib_do_dlsym_patch];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+	kmem[3] = 0x90;
+	kmem[4] = 0x90;
+	kmem[5] = 0x90;
+
+
+	// Enable mount for unprivileged user
+	kmem = (uint8_t *)&kernel_base[enable_mount_patch];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+	kmem[2] = 0x90;
+	kmem[3] = 0x90;
+	kmem[4] = 0x90;
+	kmem[5] = 0x90;
+
+	// patch suword_lwpid
+	// has a check to see if child_tid/parent_tid is in kernel memory, and it in so patch it
+	// Patch by: JOGolden
+	kmem = (uint8_t *)&kernel_base[enable_suword_patch1];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+
+	kmem = (uint8_t *)&kernel_base[enable_suword_patch2];
+	kmem[0] = 0x90;
+	kmem[1] = 0x90;
+
+
+	// Patch debug setting errors
+	kmem = (uint8_t *)&kernel_base[debug_menu_error_patch1];
 	kmem[0] = 0x00;
 	kmem[1] = 0x00;
 	kmem[2] = 0x00;
 	kmem[3] = 0x00;
 
-        // patch vm_map_protect check
-	memcpy((void *)(kernel_base + vm_map_protect_check), "\x90\x90\x90\x90\x90\x90", 6);
+	kmem = (uint8_t *)&kernel_base[debug_menu_error_patch2];
+	kmem[0] = 0x00;
+	kmem[1] = 0x00;
+	kmem[2] = 0x00;
+	kmem[3] = 0x00;
 
 	// install kpayload
 	memset(payload_buffer, 0, PAGE_SIZE);
