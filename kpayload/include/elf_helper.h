@@ -43,44 +43,44 @@ typedef uint64_t elf64_off_t;
 typedef uint64_t elf64_addr_t;
 
 struct elf64_ehdr {
-	uint8_t ident[ELF_IDENT_SIZE];
-	elf64_half_t type;
-	elf64_half_t machine;
-	elf64_word_t version;
-	elf64_addr_t entry;
-	elf64_off_t phoff;
-	elf64_off_t shoff;
-	elf64_word_t flags;
-	elf64_half_t ehsize;
-	elf64_half_t phentsize;
-	elf64_half_t phnum;
-	elf64_half_t shentsize;
-	elf64_half_t shnum;
-	elf64_half_t shstrndx;
+  uint8_t ident[ELF_IDENT_SIZE];
+  elf64_half_t type;
+  elf64_half_t machine;
+  elf64_word_t version;
+  elf64_addr_t entry;
+  elf64_off_t phoff;
+  elf64_off_t shoff;
+  elf64_word_t flags;
+  elf64_half_t ehsize;
+  elf64_half_t phentsize;
+  elf64_half_t phnum;
+  elf64_half_t shentsize;
+  elf64_half_t shnum;
+  elf64_half_t shstrndx;
 };
 
 struct elf64_phdr {
-	elf64_word_t type;
-	elf64_word_t flags;
-	elf64_off_t offset;
-	elf64_addr_t vaddr;
-	elf64_addr_t paddr;
-	elf64_xword_t filesz;
-	elf64_xword_t memsz;
-	elf64_xword_t align;
+  elf64_word_t type;
+  elf64_word_t flags;
+  elf64_off_t offset;
+  elf64_addr_t vaddr;
+  elf64_addr_t paddr;
+  elf64_xword_t filesz;
+  elf64_xword_t memsz;
+  elf64_xword_t align;
 };
 
 struct elf64_shdr {
-	elf64_word_t name;
-	elf64_word_t type;
-	elf64_xword_t flags;
-	elf64_addr_t addr;
-	elf64_off_t offset;
-	elf64_xword_t size;
-	elf64_word_t link;
-	elf64_word_t info;
-	elf64_xword_t addralign;
-	elf64_xword_t entsize;
+  elf64_word_t name;
+  elf64_word_t type;
+  elf64_xword_t flags;
+  elf64_addr_t addr;
+  elf64_off_t offset;
+  elf64_xword_t size;
+  elf64_word_t link;
+  elf64_word_t info;
+  elf64_xword_t addralign;
+  elf64_xword_t entsize;
 };
 
 #endif

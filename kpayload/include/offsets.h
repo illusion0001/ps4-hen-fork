@@ -4,64 +4,64 @@
 #error FW not set
 #endif
 
-#if FW==505
+#if FW == 505
 #include "offsets/505.h"
-#elif FW==672
+#elif FW == 672
 #include "offsets/672.h"
-#elif FW==700
+#elif FW == 700
 #include "offsets/700-702.h"
-#elif FW==701
+#elif FW == 701
 #include "offsets/700-702.h"
-#elif FW==702
+#elif FW == 702
 #include "offsets/700-702.h"
-#elif FW==750
+#elif FW == 750
 #include "offsets/750.h"
-#elif FW==751
+#elif FW == 751
 #include "offsets/751.h"
-#elif FW==755
+#elif FW == 755
 #include "offsets/755.h"
-#elif FW==800
+#elif FW == 800
 #include "offsets/800-801.h"
-#elif FW==801
+#elif FW == 801
 #include "offsets/800-801.h"
-#elif FW==803
+#elif FW == 803
 #include "offsets/803.h"
-#elif FW==850
+#elif FW == 850
 #include "offsets/850.h"
-#elif FW==852
+#elif FW == 852
 #include "offsets/852.h"
-#elif FW==900
+#elif FW == 900
 #include "offsets/900.h"
-#elif FW==903
+#elif FW == 903
 #include "offsets/903.h"
-#elif FW==904
+#elif FW == 904
 #include "offsets/904.h"
-#elif FW==950
+#elif FW == 950
 #include "offsets/950.h"
-#elif FW==951
+#elif FW == 951
 #include "offsets/951.h"
-#elif FW==960
+#elif FW == 960
 #include "offsets/960.h"
-#elif FW==1000
+#elif FW == 1000
 #include "offsets/1000.h"
-#elif FW==1001
+#elif FW == 1001
 #include "offsets/1001.h"
-#elif FW==1050
+#elif FW == 1050
 #include "offsets/1050.h"
-#elif FW==1070
+#elif FW == 1070
 #include "offsets/1070-1071.h"
-#elif FW==1071
+#elif FW == 1071
 #include "offsets/1070-1071.h"
-#elif FW==1100
+#elif FW == 1100
 #include "offsets/1100.h"
-#elif FW==1102
+#elif FW == 1102
 #include "offsets/1102.h"
-#elif FW==1150
+#elif FW == 1150
 #include "offsets/1150-1152.h"
-#elif FW==1152
+#elif FW == 1152
 #include "offsets/1150-1152.h"
-#elif FW==1200
+#elif FW == 1200
 #include "offsets/1200-1202.h"
-#elif FW==1202
+#elif FW == 1202
 #include "offsets/1200-1202.h"
 #endif

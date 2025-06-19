@@ -2,9 +2,9 @@
 #define __OFFSETS_H__
 #pragma once
 
-// 10.70 - 10.71
+// 10.70-10.71
 // data
-#define	XFAST_SYSCALL_addr              0x000001C0
+#define XFAST_SYSCALL_addr              0x000001C0
 #define M_TEMP_addr                     0x01A5FE30
 #define MINI_SYSCORE_SELF_BINARY_addr   0x01541E78
 #define ALLPROC_addr                    0x02269F30
@@ -62,32 +62,32 @@
 #define proc_rwmem_addr                 0x004244A0
 
 // Fself hooks
-#define sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook          0x0064117C
-#define sceSblAuthMgrIsLoadable2_hook                               0x006412CE
-#define sceSblAuthMgrVerifyHeader_hook1                             0x00641A66
-#define sceSblAuthMgrVerifyHeader_hook2                             0x00642749
-#define sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox_hook   0x0063E2FD
-#define sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox_hook     0x0063EF38
+#define sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook        0x0064117C
+#define sceSblAuthMgrIsLoadable2_hook                             0x006412CE
+#define sceSblAuthMgrVerifyHeader_hook1                           0x00641A66
+#define sceSblAuthMgrVerifyHeader_hook2                           0x00642749
+#define sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox_hook 0x0063E2FD
+#define sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox_hook   0x0063EF38
 
 // Fpkg hooks
-#define sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg_hook         0x006229B5
-#define sceSblKeymgrInvalidateKey__sx_xlock_hook                    0x0062682D
-#define sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif_hook      0x0064B880
-#define sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new_hook           0x0064C64E
-#define mountpfs__sceSblPfsSetKeys_hook1                            0x006B59F9
-#define mountpfs__sceSblPfsSetKeys_hook2                            0x006B5C2A
+#define sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg_hook       0x006229B5
+#define sceSblKeymgrInvalidateKey__sx_xlock_hook                  0x0062682D
+#define sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif_hook    0x0064B880
+#define sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new_hook         0x0064C64E
+#define mountpfs__sceSblPfsSetKeys_hook1                          0x006B59F9
+#define mountpfs__sceSblPfsSetKeys_hook2                          0x006B5C2A
 
-//libkernel_sys.sprx patches - debug patches
-#define sceSblRcMgrIsAllowDebugMenuForSettings_patch                0x0001CFC0
-#define sceSblRcMgrIsStoreMode_patch                                0x0001D320
+// SceShellUI patches - debug patches - libkernel_sys.sprx
+#define sceSblRcMgrIsAllowDebugMenuForSettings_patch              0x0001CFC0
+#define sceSblRcMgrIsStoreMode_patch                              0x0001D320
 
 // SceShellUI patches - remote play patches
-#define CreateUserForIDU_patch                                      0x00188CB0 //system_ex\app\NPXS20001\eboot.bin
-#define remote_play_menu_patch                                      0x00EC7B12 //system_ex\app\NPXS20001\psm\Application\app.exe.sprx
+#define CreateUserForIDU_patch                                    0x00188CB0 // system_ex\app\NPXS20001\eboot.bin
+#define remote_play_menu_patch                                    0x00EC7B12 // system_ex\app\NPXS20001\psm\Application\app.exe.sprx
 
 // SceRemotePlay patches - remote play patches - system\vsh\app\NPXS21006
-#define SceRemotePlay_patch1                                        0x000EC9F5
-#define SceRemotePlay_patch2                                        0x000ECA10
+#define SceRemotePlay_patch1                                      0x000EC9F5
+#define SceRemotePlay_patch2                                      0x000ECA10
 
 // SceShellCore patches - call sceKernelIsGenuineCEX
 #define sceKernelIsGenuineCEX_patch1    0x0016B664
@@ -102,6 +102,7 @@
 #define nidf_libSceDipsw_patch4         0x00A0CAB2
 
 // SceShellCore patches - bypass firmware checks
+#define check_disc_root_param_patch     0xDEADC0DE
 #define app_installer_patch             0x00134A50
 #define check_system_version            0x003C1957
 #define check_title_system_update_patch 0x003C4BA0

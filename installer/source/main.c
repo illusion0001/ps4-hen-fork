@@ -1,334 +1,389 @@
-#include "ps4.h"
+// #define DEBUG_SOCKET
+#define DEBUG_IP "192.168.2.2"
+#define DEBUG_PORT 9023
+
+#define VERSION "2.2.0 BETA"
 
 #include "defines.h"
 #include "offsets.h"
 
-#define PS4_UPDATE_FULL_PATH "/update/PS4UPDATE.PUP"
-#define PS4_UPDATE_TEMP_PATH "/update/PS4UPDATE.PUP.net.temp"
+#include <ps4.h>
 
 extern char kpayload[];
 extern unsigned kpayload_size;
 
-int install_payload(struct thread *td, struct install_payload_args* args)
-{
-	struct ucred* cred;
-	struct filedesc* fd;
+// Return 0 on success
+// Return -1 on unsupported firmware error
+// Can also just give a memory error in the browser or panic the console on failure
+int kpayload_patches(struct thread *td, struct kpayload_firmware_args *args) {
+  UNUSED(td);
+  void *kernel_base;
+  uint8_t *kernel_ptr;
 
-	fd = td->td_proc->p_fd;
-	cred = td->td_proc->p_ucred;
+  // Use "kmem" for all patches
+  uint8_t *kmem;
 
-	uint8_t* kernel_base = (uint8_t*)(__readmsr(0xC0000082) - XFAST_SYSCALL_addr);
-	uint8_t* kernel_ptr = (uint8_t*)kernel_base;
-	void** got_prison0 = (void**)&kernel_ptr[PRISON0_addr];
-	void** got_rootvnode = (void**)&kernel_ptr[ROOTVNODE_addr];
+  // Pointers to be assigned in build_kpayload macro
+  uint8_t *uart_patch;
+  // uint8_t *is_diag_process_patch;
+  // uint8_t *allow_system_level_logging_patch;
+  // uint8_t *allow_coredump_patch;
+  uint8_t *copyin_patch_1;
+  uint8_t *copyin_patch_2;
+  uint8_t *copyout_patch_1;
+  uint8_t *copyout_patch_2;
+  uint8_t *copyinstr_patch_1;
+  uint8_t *copyinstr_patch_2;
+  uint8_t *copyinstr_patch_3;
+  uint8_t *setlogin_patch;
+  uint8_t *pfs_signature_check_patch;
+  uint8_t *debug_rif_patch_1;
+  uint8_t *debug_rif_patch_2;
+  uint8_t *debug_settings_error_patch_1;
+  uint8_t *debug_settings_error_patch_2;
+  // uint8_t *mount_patch;
+  uint8_t *depth_limit_patch;
 
-	void (*pmap_protect)(void * pmap, uint64_t sva, uint64_t eva, uint8_t pr) = (void *)(kernel_base + pmap_protect_addr);
-	void *kernel_pmap_store = (void *)(kernel_base + PMAP_STORE_addr);
+  uint16_t fw_version = args->kpayload_firmware_info->fw_version;
 
-	uint8_t* payload_data = args->payload_info->buffer;
-	size_t payload_size = args->payload_info->size;
-	struct payload_header* payload_header = (struct payload_header*)payload_data;
-	uint8_t* payload_buffer = (uint8_t*)&kernel_base[DT_HASH_SEGMENT_addr];
+  // NOTE: This is a C preprocessor macro
+  build_kpayload(fw_version, patch_macro);
 
-	if (!payload_data || payload_size < sizeof(payload_header) || payload_header->signature != 0x5041594C4F414458ull)
-		return -1;
+  // Disable write protection
+  uint64_t cr0 = readCr0();
+  writeCr0(cr0 & ~X86_CR0_WP);
 
-	cred->cr_uid = 0;
-	cred->cr_ruid = 0;
-	cred->cr_rgid = 0;
-	cred->cr_groups[0] = 0;
+  // Enable UART
+  kmem = (uint8_t *)uart_patch;
+  kmem[0] = 0x00;
 
-	cred->cr_prison = *got_prison0;
-	fd->fd_rdir = fd->fd_jdir = *got_rootvnode;
+  // sceSblACMgrIsDiagProcess
+  // kmem = (uint8_t *)is_diag_process_patch;
+  // kmem[0] = 0xB8;
+  // kmem[1] = 0x01;
+  // kmem[2] = 0x00;
+  // kmem[3] = 0x00;
+  // kmem[4] = 0x00;
+  // kmem[5] = 0xC3;
 
-	// escalate ucred privs, needed for access to the filesystem ie* mounting & decrypting files
-	void *td_ucred = *(void **)(((char *)td) + 304); // p_ucred == td_ucred
+  // sceSblACMgrIsAllowedSystemLevelDebugging
+  // kmem = (uint8_t *)allow_system_level_logging_patch;
+  // kmem[0] = 0xB8;
+  // kmem[1] = 0x01;
+  // kmem[2] = 0x00;
+  // kmem[3] = 0x00;
+  // kmem[4] = 0x00;
+  // kmem[5] = 0xC3;
 
-	// sceSblACMgrIsSystemUcred
-	uint64_t *sonyCred = (uint64_t *)(((char *)td_ucred) + 96);
-	*sonyCred = 0xffffffffffffffff;
+  // sceSblACMgrIsAllowedCoredump
+  // kmem = (uint8_t *)allow_coredump_patch;
+  // kmem[0] = 0xB8;
+  // kmem[1] = 0x01;
+  // kmem[2] = 0x00;
+  // kmem[3] = 0x00;
+  // kmem[4] = 0x00;
+  // kmem[5] = 0xC3;
 
-	// sceSblACMgrGetDeviceAccessType
-	uint64_t *sceProcType = (uint64_t *)(((char *)td_ucred) + 88);
-	*sceProcType = 0x3801000000000013; // Max access
+  // Patch copyin/copyout/copyinstr to allow userland + kernel addresses in both params
+  // copyin
+  kmem = (uint8_t *)copyin_patch_1;
+  kmem[0] = 0xEB;
+  kmem[1] = 0x00;
 
-	// sceSblACMgrHasSceProcessCapability
-	uint64_t *sceProcCap = (uint64_t *)(((char *)td_ucred) + 104);
-	*sceProcCap = 0xffffffffffffffff; // Sce Process
+  if (fw_version >= 550) {
+    kmem = (uint8_t *)copyin_patch_2;
+    kmem[0] = 0xEB;
+    kmem[1] = 0x01;
+  }
 
-	// Use "kmem" for all patches
-        uint8_t *kmem;
+  kmem = (uint8_t *)copyout_patch_1;
+  kmem[0] = 0xEB;
+  kmem[1] = 0x00;
 
-	// Disable write protection
-	uint64_t cr0 = readCr0();
-	writeCr0(cr0 & ~X86_CR0_WP);
+  if (fw_version >= 550) {
+    kmem = (uint8_t *)copyout_patch_2;
+    kmem[0] = 0xEB;
+    kmem[1] = 0x01;
+  }
 
-	// Enable UART
-	kmem = (uint8_t *)&kernel_base[enable_uart_patch];
-	kmem[0] = 0x00;
-	kmem[1] = 0x00;
-	kmem[2] = 0x00;
-	kmem[3] = 0x00;
+  // copyinstr
+  kmem = (uint8_t *)copyinstr_patch_1;
+  kmem[0] = 0xEB;
+  kmem[1] = 0x00;
 
-        //flatz Patch sys_dynlib_dlsym: Allow from anywhere
-	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch1];
-	kmem[0] = 0xEB;
-	kmem[1] = 0x4C;
+  if (fw_version >= 550) {
+    kmem = (uint8_t *)copyinstr_patch_2;
+    kmem[0] = 0xEB;
+    kmem[1] = 0x01;
+  }
 
-	kmem = (uint8_t *)&kernel_base[sys_dynlib_dlsym_patch2];
-	kmem[0] = 0x31;
-	kmem[1] = 0xC0;
-	kmem[2] = 0xC3;
+  kmem = (uint8_t *)copyinstr_patch_3;
+  kmem[0] = 0xEB;
+  kmem[1] = 0x00;
 
-	// Patch sys_mmap: Allow RWX (read-write-execute) mapping
-	kmem = (uint8_t *)&kernel_base[sys_mmap_patch];
-	kmem[0] = 0x37;
-	kmem[3] = 0x37;
+  // setlogin patch (for autolaunch check)
+  kmem = (uint8_t *)setlogin_patch;
+  kmem[0] = 0x48;
+  kmem[1] = 0x31;
+  kmem[2] = 0xC0;
+  kmem[3] = 0xEB;
+  kmem[4] = 0x00;
 
-	// Patch setuid: Don't run kernel exploit more than once/privilege escalation
-	kmem = (uint8_t *)&kernel_base[enable_setuid_patch];
-	kmem[0] = 0xB8;
-	kmem[1] = 0x00;
-	kmem[2] = 0x00;
-	kmem[3] = 0x00;
-	kmem[4] = 0x00;
+  // Disable PFS signature check
+  kmem = (uint8_t *)pfs_signature_check_patch;
+  kmem[0] = 0x31;
+  kmem[1] = 0xC0;
+  kmem[2] = 0xC3;
 
-	// Enable RWX (kmem_alloc) mapping
-	kmem = (uint8_t *)&kernel_base[kmem_alloc_patch1];
-	kmem[0] = 0x07;
+  // Enable debug RIFs
+  kmem = (uint8_t *)debug_rif_patch_1;
+  kmem[0] = 0xB0;
+  kmem[1] = 0x01;
+  kmem[2] = 0xC3;
 
-	kmem = (uint8_t *)&kernel_base[kmem_alloc_patch2];
-	kmem[0] = 0x07;
+  kmem = (uint8_t *)debug_rif_patch_2;
+  kmem[0] = 0xB0;
+  kmem[1] = 0x01;
+  kmem[2] = 0xC3;
 
-	// Patch copyin/copyout: Allow userland + kernel addresses in both params
-	// copyin
-	kmem = (uint8_t *)&kernel_base[enable_copyin_patch1];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	
-	if (FW != 505)
-	{
-	kmem = (uint8_t *)&kernel_base[enable_copyin_patch2];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	}
-	// copyout
-	kmem = (uint8_t *)&kernel_base[enable_copyout_patch1];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
+  // Patch debug setting errors
+  kmem = (uint8_t *)debug_settings_error_patch_1;
+  kmem[0] = 0x00;
+  kmem[1] = 0x00;
+  kmem[2] = 0x00;
+  kmem[3] = 0x00;
 
-	if (FW != 505)
-	{
-	kmem = (uint8_t *)&kernel_base[enable_copyout_patch2];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	}
-	
-	// Patch copyinstr
-	kmem = (uint8_t *)&kernel_base[enable_copyinstr_patch1];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	
-	if (FW != 505)
-	{
-	kmem = (uint8_t *)&kernel_base[enable_copyinstr_patch2];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	}
-	
-	kmem = (uint8_t *)&kernel_base[enable_copyinstr_patch3];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
+  kmem = (uint8_t *)debug_settings_error_patch_2;
+  kmem[0] = 0x00;
+  kmem[1] = 0x00;
+  kmem[2] = 0x00;
+  kmem[3] = 0x00;
 
-	// Patch memcpy stack
-	kmem = (uint8_t *)&kernel_base[enable_memcpy_patch];
-	kmem[0] = 0xEB;
+  // Enable mount for unprivileged user
+  // kmem = (uint8_t *)mount_patch;
+  // kmem[0] = 0xEB;
+  // kmem[1] = 0x04;
 
-	// ptrace patches
-	kmem = (uint8_t*)&kernel_base[enable_ptrace_patch1];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	kmem[3] = 0x90;
-	kmem[4] = 0x90;
-	kmem[5] = 0x90;
+  // Change directory depth limit from 9 to 64
+  kmem = (uint8_t *)depth_limit_patch;
+  kmem[0] = 0x40;
 
-	// second ptrace patch
-	// via DeathRGH
-	kmem = (uint8_t *)&kernel_base[enable_ptrace_patch2];
-	kmem[0] = 0xE9;
-	kmem[1] = 0x7C;
-	kmem[2] = 0x02;
-	kmem[3] = 0x00;
-	kmem[4] = 0x00;
+  // Restore write protection
+  writeCr0(cr0);
 
-   	// patch ASLR, thanks 2much4u
-   	kmem = (uint8_t *)&kernel_base[disable_aslr_patch];
-   	kmem[0] = 0x90;
-   	kmem[1] = 0x90;
-
-    // Change directory depth limit from 9 to 64
-	kmem = (uint8_t *)&kernel_base[depth_limit_patch];
-	kmem[0] = 0x40;
-	
-	// setlogin patch (for autolaunch check)
-	kmem = (uint8_t *)&kernel_base[enable_setlogin_patch];
-	kmem[0] = 0x48;
-	kmem[1] = 0x31;
-	kmem[2] = 0xC0;
-	kmem[3] = 0x90;
-	kmem[4] = 0x90;
-
-	// Patch to remove vm_fault: fault on nofault entry, addr %llx
-	kmem = (uint8_t *)&kernel_base[enable_vmfault_patch];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	kmem[3] = 0x90;
-	kmem[4] = 0x90;
-	kmem[5] = 0x90;
-
-	// Patch mprotect: Allow RWX (mprotect) mapping
-	kmem = (uint8_t *)&kernel_base[vm_map_protect_check];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	kmem[3] = 0x90;
-	kmem[4] = 0x90;
-	kmem[5] = 0x90;
-
-	// flatz disable pfs signature check
-	kmem = (uint8_t *)&kernel_base[disable_signature_check_patch];
-	kmem[0] = 0x31;
-	kmem[1] = 0xC0;
-	kmem[2] = 0xC3;
-
-	// flatz enable debug RIFs
-	kmem = (uint8_t *)&kernel_base[enable_debug_rifs_patch1];
-	kmem[0] = 0xB0;
-	kmem[1] = 0x01;
-	kmem[2] = 0xC3;
-
-	kmem = (uint8_t *)&kernel_base[enable_debug_rifs_patch2];
-	kmem[0] = 0xB0;
-	kmem[1] = 0x01;
-	kmem[2] = 0xC3;
-
-	// Enable *all* debugging logs (in vprintf)
-	// Patch by: SiSTRo
-	kmem = (uint8_t *)&kernel_base[enable_debug_log_patch];
-	kmem[0] = 0xEB;
-	kmem[1] = 0x3B;
-
-	// flatz allow mangled symbol in dynlib_do_dlsym
-	kmem = (uint8_t *)&kernel_base[dynlib_do_dlsym_patch];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	kmem[3] = 0x90;
-	kmem[4] = 0x90;
-	kmem[5] = 0x90;
-
-
-	// Enable mount for unprivileged user
-	kmem = (uint8_t *)&kernel_base[enable_mount_patch];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-	kmem[2] = 0x90;
-	kmem[3] = 0x90;
-	kmem[4] = 0x90;
-	kmem[5] = 0x90;
-
-	// patch suword_lwpid
-	// has a check to see if child_tid/parent_tid is in kernel memory, and it in so patch it
-	// Patch by: JOGolden
-	kmem = (uint8_t *)&kernel_base[enable_suword_patch1];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-
-	kmem = (uint8_t *)&kernel_base[enable_suword_patch2];
-	kmem[0] = 0x90;
-	kmem[1] = 0x90;
-
-
-	// Patch debug setting errors
-	kmem = (uint8_t *)&kernel_base[debug_menu_error_patch1];
-	kmem[0] = 0x00;
-	kmem[1] = 0x00;
-	kmem[2] = 0x00;
-	kmem[3] = 0x00;
-
-	kmem = (uint8_t *)&kernel_base[debug_menu_error_patch2];
-	kmem[0] = 0x00;
-	kmem[1] = 0x00;
-	kmem[2] = 0x00;
-	kmem[3] = 0x00;
-
-	// install kpayload
-	memset(payload_buffer, 0, PAGE_SIZE);
-	memcpy(payload_buffer, payload_data, payload_size);
-
-	uint64_t sss = ((uint64_t)payload_buffer) & ~(uint64_t)(PAGE_SIZE-1);
-	uint64_t eee = ((uint64_t)payload_buffer + payload_size + PAGE_SIZE - 1) & ~(uint64_t)(PAGE_SIZE-1);
-	kernel_base[pmap_protect_p_addr] = 0xEB;
-	pmap_protect(kernel_pmap_store, sss, eee, 7);
-	kernel_base[pmap_protect_p_addr] = 0x75;
-
-	// Restore write protection
-	writeCr0(cr0);
-
-	int (*payload_entrypoint)();
-	*((void**)&payload_entrypoint) = (void*)(&payload_buffer[payload_header->entrypoint_offset]);
-
-	return payload_entrypoint();
+  return 0;
 }
 
-static inline void patch_update(void)
-{
-  unlink(PS4_UPDATE_FULL_PATH);
-  rmdir(PS4_UPDATE_FULL_PATH);
-  if (mkdir(PS4_UPDATE_FULL_PATH, 0777) != 0) {
-    printf_debug("Failed to create /update/PS4UPDATE.PUP.");
+// Return 0 on success
+// Return -1 on memory allocation error or unsupported firmware error
+// Can also just give a memory error in the browser or panic the console on failure
+int kpayload_install_payload(struct thread *td, struct kpayload_install_payload_args *args) {
+  UNUSED(td);
+  void *kernel_base;
+  uint8_t *kernel_ptr;
+
+  // Use "kmem" for all patches
+  uint8_t *kmem;
+
+  // Pointers to be assigned in build_kpayload macro
+  void *kernel_pmap_store;
+  uint8_t *pmap_protect_p_patch;
+  uint8_t *payload_buffer;
+
+  void (*pmap_protect)(void *pmap, uint64_t sva, uint64_t eva, uint8_t pr);
+
+  uint16_t fw_version = args->kpayload_payload_info->fw_version;
+
+  // NOTE: This is a C preprocessor macro
+  build_kpayload(fw_version, install_macro);
+
+  uint8_t *payload_data = args->kpayload_payload_info->buffer;
+  size_t payload_size = args->kpayload_payload_info->size;
+
+  struct kpayload_payload_header *payload_header = (struct kpayload_payload_header *)payload_data;
+
+  if (!payload_data || payload_size < sizeof(payload_header) || payload_header->signature != 0x5041594C4F414458ull) { // `payloadx`
+    return -1;
   }
-	
-  unlink(PS4_UPDATE_TEMP_PATH);
-  rmdir(PS4_UPDATE_TEMP_PATH);
-  if (mkdir(PS4_UPDATE_TEMP_PATH, 0777) != 0) {
-    printf_debug("Failed to create /update/PS4UPDATE.PUP.net.temp.");
-  }
+
+  // Disable write protection
+  uint64_t cr0 = readCr0();
+  writeCr0(cr0 & ~X86_CR0_WP);
+
+  memset(payload_buffer, '\0', PAGE_SIZE);
+  memcpy(payload_buffer, payload_data, payload_size);
+
+  uint64_t sss = ((uint64_t)payload_buffer) & ~(uint64_t)(PAGE_SIZE - 1);
+  uint64_t eee = ((uint64_t)payload_buffer + payload_size + PAGE_SIZE - 1) & ~(uint64_t)(PAGE_SIZE - 1);
+
+  kmem = (uint8_t *)pmap_protect_p_patch;
+  kmem[0] = 0xEB;
+  pmap_protect(kernel_pmap_store, sss, eee, 7);
+  kmem[0] = 0x75;
+
+  // Restore write protection
+  writeCr0(cr0);
+
+  int (*payload_entrypoint)();
+  *((void **)&payload_entrypoint) = (void *)(&payload_buffer[payload_header->entrypoint_offset]);
+
+  return payload_entrypoint();
 }
 
-int _main(struct thread *td)
- {
+// Passes on the result of kpayload_patches
+int install_patches() {
+  struct kpayload_firmware_info kpayload_firmware_info;
+  kpayload_firmware_info.fw_version = get_firmware();
+  return kexec(&kpayload_patches, &kpayload_firmware_info);
+}
 
-	int result;
+// Passes on the result of kpayload_install_payload
+int install_payload() {
+  struct kpayload_payload_info kpayload_payload_info;
+  kpayload_payload_info.fw_version = get_firmware();
+  kpayload_payload_info.buffer = (uint8_t *)kpayload;
+  kpayload_payload_info.size = (size_t)kpayload_size;
 
-	initKernel();
-	initLibc();
+  return kexec(&kpayload_install_payload, &kpayload_payload_info);
+}
 
-    printf_debug("Starting...\n");
+// Return 0 on "success" including no file found
+// Return -1 on error
+int read_set_target_id() {
+  int fd = open("/mnt/usb0/target.id", O_RDONLY, 0);
+  if (fd < 0) {
+    // No file found, assume they just don't have one on purpose
+    return 0;
+  }
 
-	struct payload_info payload_info;
-	payload_info.buffer = (uint8_t *)kpayload;
-	payload_info.size = (size_t)kpayload_size;
+  char hexstring[5] = {0};
+  int bytes_read = read(fd, hexstring, 4);
+  close(fd);
+  if (bytes_read != 4) {
+    printf_notification("ERROR: Malformed target.id:\n    Must be 4 bytes (e.g. 0x84)");
+    return -1;
+  }
+  if (hexstring[0] != '0' || hexstring[1] != 'x' || !isxdigit(hexstring[2]) || !isxdigit(hexstring[3])) {
+    printf_notification("ERROR: Malformed target.id:\n    Incorrect format, must be 0x?? (e.g. 0x84)");
+    return -1;
+  }
 
-	errno = 0;
+  int hex;
+  sscanf(hexstring, "%x", &hex);
 
-	result = kexec(&install_payload, &payload_info);
-	result = !result ? 0 : errno;
-	printf_debug("install_payload: %d\n", result);
+  // Longest string for this buffer is 23 chars + 1 null term
+  char buffer[0x100] = {0};
+  int buffer_size = sizeof(buffer);
+  switch (hex) {
+  case 0x80:
+    snprintf_s(buffer, buffer_size, "Diagnostic");
+    break;
+  case 0x81:
+    snprintf_s(buffer, buffer_size, "Devkit");
+    break;
+  case 0x82:
+    snprintf_s(buffer, buffer_size, "Testkit");
+    break;
+  case 0x83:
+    snprintf_s(buffer, buffer_size, "Japan");
+    break;
+  case 0x84:
+    snprintf_s(buffer, buffer_size, "USA");
+    break;
+  case 0x85:
+    snprintf_s(buffer, buffer_size, "Europe");
+    break;
+  case 0x86:
+    snprintf_s(buffer, buffer_size, "Korea");
+    break;
+  case 0x87:
+    snprintf_s(buffer, buffer_size, "United Kingdom");
+    break;
+  case 0x88:
+    snprintf_s(buffer, buffer_size, "Mexico");
+    break;
+  case 0x89:
+    snprintf_s(buffer, buffer_size, "Australia & New Zealand");
+    break;
+  case 0x8A:
+    snprintf_s(buffer, buffer_size, "South Asia");
+    break;
+  case 0x8B:
+    snprintf_s(buffer, buffer_size, "Taiwan");
+    break;
+  case 0x8C:
+    snprintf_s(buffer, buffer_size, "Russia");
+    break;
+  case 0x8D:
+    snprintf_s(buffer, buffer_size, "China");
+    break;
+  case 0x8E:
+    snprintf_s(buffer, buffer_size, "Hong Kong");
+    break;
+  case 0x8F:
+    snprintf_s(buffer, buffer_size, "Brazil");
+    break;
+  case 0xA0:
+    snprintf_s(buffer, buffer_size, "Kratos");
+    break;
+  default:
+    printf_notification("Spoofing: UNKNOWN...\nCheck your `/mnt/usb0/target.id` file");
+    return -1;
+  }
 
-	patch_update();
-	initSysUtil();
+  if (spoof_target_id(hex) != 0) {
+    printf_notification("ERROR: Unable to spoof target ID");
+    return -1;
+  }
 
-    char fw_version[6] = {0};
-    get_firmware_string(fw_version);
-	printf_notification("Welcome To PS4HEN v"VERSION"\nPS4 Firmware %s", fw_version);
+  printf_notification("Spoofing: %s", buffer);
+  return 0;
+}
 
-	printf_debug("Done.\n");
+int _main(struct thread *td) {
+  UNUSED(td);
 
-	return result;
+  initKernel();
+  initLibc();
+
+#ifdef DEBUG_SOCKET
+  initNetwork();
+  DEBUG_SOCK = SckConnect(DEBUG_IP, DEBUG_PORT);
+#endif
+
+  // Jailbreak the process
+  jailbreak();
+
+  // Apply all HEN kernel patches
+  install_patches();
+  mmap_patch();
+
+  // Disable userland ASLR
+  if (file_exists("/mnt/usb0/enable.aslr")) {
+    disable_aslr();
+  }
+
+  // If `/mnt/usb0/no.bd` is found patch for the NoBD update method
+  if (file_exists("/mnt/usb0/no.bd")) {
+    no_bd_patch();
+    printf_notification("NoBD patches enabled");
+  }
+
+  // Install and run kpayload
+  install_payload();
+
+  // Do this after the kpayload so if the user spoofs it doesn't effect checks in the kpayload
+  // Spoofs the console's Target ID depending on the user's setup
+  if (file_exists("/mnt/usb0/target.id")) {
+    read_set_target_id();
+  }
+
+  printf_notification("Welcome to HEN %s", VERSION);
+
+#ifdef DEBUG_SOCKET
+  printf_debug("Closing socket...\n");
+  SckClose(DEBUG_SOCK);
+#endif
+
+  return 0;
 }

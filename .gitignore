@@ -1,5 +1,11 @@
-build/
-tool/bin2js
-*.bin
-*.js
-*.map
+/.vscode/
+
+/installer/build/
+/installer/*.bin
+/installer/*.map
+
+/kpayload/build/
+/kpayload/*.bin
+/kpayload/*.map
+
+/hen.bin

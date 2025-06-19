@@ -4,7 +4,7 @@
 
 // 8.03
 // data
-#define	XFAST_SYSCALL_addr              0x000001C0
+#define XFAST_SYSCALL_addr              0x000001C0
 #define M_TEMP_addr                     0x01A77E10
 #define MINI_SYSCORE_SELF_BINARY_addr   0x01577F28
 #define ALLPROC_addr                    0x01B244E0
@@ -62,32 +62,32 @@
 #define proc_rwmem_addr                 0x00173770
 
 // Fself hooks
-#define sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook          0x0063B8BC
-#define sceSblAuthMgrIsLoadable2_hook                               0x0063BA0E
-#define sceSblAuthMgrVerifyHeader_hook1                             0x0063C1A6
-#define sceSblAuthMgrVerifyHeader_hook2                             0x0063CE89
-#define sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox_hook   0x0063F59D
-#define sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox_hook     0x006401D8
+#define sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook        0x0063B8BC
+#define sceSblAuthMgrIsLoadable2_hook                             0x0063BA0E
+#define sceSblAuthMgrVerifyHeader_hook1                           0x0063C1A6
+#define sceSblAuthMgrVerifyHeader_hook2                           0x0063CE89
+#define sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox_hook 0x0063F59D
+#define sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox_hook   0x006401D8
 
 // Fpkg hooks
-#define sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg_hook         0x00628055
-#define sceSblKeymgrInvalidateKey__sx_xlock_hook                    0x0061F40D
-#define sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif_hook      0x0064C590
-#define sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new_hook           0x0064D35E
-#define mountpfs__sceSblPfsSetKeys_hook1                            0x0068D509
-#define mountpfs__sceSblPfsSetKeys_hook2                            0x0068D73A
+#define sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg_hook       0x00628055
+#define sceSblKeymgrInvalidateKey__sx_xlock_hook                  0x0061F40D
+#define sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif_hook    0x0064C590
+#define sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new_hook         0x0064D35E
+#define mountpfs__sceSblPfsSetKeys_hook1                          0x0068D509
+#define mountpfs__sceSblPfsSetKeys_hook2                          0x0068D73A
 
-//libkernel_sys.sprx patches - debug patches
-#define sceSblRcMgrIsAllowDebugMenuForSettings_patch                0x0001D130
-#define sceSblRcMgrIsStoreMode_patch                                0x0001D490
+// SceShellUI patches - debug patches - libkernel_sys.sprx
+#define sceSblRcMgrIsAllowDebugMenuForSettings_patch              0x0001D130
+#define sceSblRcMgrIsStoreMode_patch                              0x0001D490
 
-//ShellUI patches - remote play patches                                
-#define CreateUserForIDU_patch                                      0x00187300 //system_ex\app\NPXS20001\eboot.bin
-#define remote_play_menu_patch                                      0x00EDB6B1 //system_ex\app\NPXS20001\psm\Application\app.exe.sprx
+// SceShellUI patches - remote play patches
+#define CreateUserForIDU_patch                                    0x00187300 // system_ex\app\NPXS20001\eboot.bin
+#define remote_play_menu_patch                                    0x00EDB6B1 // system_ex\app\NPXS20001\psm\Application\app.exe.sprx
 
 // SceRemotePlay patches - remote play patches - system\vsh\app\NPXS21006
-#define SceRemotePlay_patch1                                        0x0010C4C8
-#define SceRemotePlay_patch2                                        0x0010C4E6
+#define SceRemotePlay_patch1                                      0x0010C4C8
+#define SceRemotePlay_patch2                                      0x0010C4E6
 
 // SceShellCore patches - call sceKernelIsGenuineCEX
 #define sceKernelIsGenuineCEX_patch1    0x00168D20
