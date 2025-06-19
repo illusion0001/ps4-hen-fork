@@ -42,7 +42,7 @@
 #define sceSblAuthMgrVerifyHeader_addr  0x0063C590
 
 // Fpkg
-#define RsaesPkcs1v15Dec2048CRT_addr    0x003C7360
+#define RsaesPkcs1v15Dec2048CRT_addr    0x0021BB20
 #define Sha256Hmac_addr                 0x001F8C60
 #define AesCbcCfb128Encrypt_addr        0x00340BF0
 #define AesCbcCfb128Decrypt_addr        0x00340E20

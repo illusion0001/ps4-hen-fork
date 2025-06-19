@@ -358,12 +358,12 @@ int _main(struct thread *td) {
   install_patches();
   mmap_patch();
 
-  // Disable userland ASLR
+  // If `/mnt/usb0/enable.aslr` exists, don't disable userland ASLR
   if (file_exists("/mnt/usb0/enable.aslr")) {
     disable_aslr();
   }
 
-  // If `/mnt/usb0/no.bd` is found patch for the NoBD update method
+  // If `/mnt/usb0/no.bd` exists, patch for the NoBD update method
   if (file_exists("/mnt/usb0/no.bd")) {
     no_bd_patch();
     printf_notification("NoBD patches enabled");
@@ -373,7 +373,8 @@ int _main(struct thread *td) {
   install_payload();
 
   // Do this after the kpayload so if the user spoofs it doesn't effect checks in the kpayload
-  // Spoofs the console's Target ID depending on the user's setup
+  // If `/mnt/usb0/target.id` exists, patch the target ID to the value in the file (eg. 0x84)
+  // Valid values: 0x80-0x8F and 0xA0
   if (file_exists("/mnt/usb0/target.id")) {
     read_set_target_id();
   }
