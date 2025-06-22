@@ -20,7 +20,9 @@ extern void (*free)(void *addr, void *type) PAYLOAD_BSS;
 extern void *(*memcpy)(void *dst, const void *src, size_t len)PAYLOAD_BSS;
 extern void *(*memset)(void *s, int c, size_t n)PAYLOAD_BSS;
 extern int (*memcmp)(const void *ptr1, const void *ptr2, size_t num) PAYLOAD_BSS;
-extern void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS; // TODO: Varies per FW
+// TODO: Varies per FW
+// extern void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS; // < 5.50
+extern void (*eventhandler_register)(void *list, const char *name, void *func, void *key, void *arg, int priority) PAYLOAD_BSS; // 5.50+ (Any changes after 6.72?)
 
 extern void *M_TEMP PAYLOAD_BSS;
 extern struct proc **ALLPROC PAYLOAD_BSS;
@@ -342,7 +344,8 @@ PAYLOAD_CODE int shellui_patch(void) {
     goto error;
   }
 
- // enable remote play menu - credits to Aida
+  // enable remote play menu - credits to Aida
+  // 10.00-12.02: "\xE9\x5C\x02\x00\x00"
   ret = proc_write_mem(ssui, (void *)(app_base + remote_play_menu_patch), 5, "\xE9\x5C\x02\x00\x00", &n); // TODO: Varies per FW
   if (ret) {
     goto error;
@@ -376,7 +379,7 @@ error:
   return ret;
 }
 
-PAYLOAD_CODE int remoteplay_patch() {
+PAYLOAD_CODE int remoteplay_patch(void) {
   uint8_t *executable_base = NULL;
 
   struct proc_vm_map_entry *entries = NULL;
@@ -456,10 +459,14 @@ PAYLOAD_CODE void restore_retail_dipsw() {
 PAYLOAD_CODE void apply_patches() {
   shellui_patch();
   remoteplay_patch();
+  shellcore_patch();
 }
 
 PAYLOAD_CODE void install_patches() {
   apply_patches();
-  // eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, NULL, EVENTHANDLER_PRI_PRE_FIRST); // TODO: Varies per FW
-  // eventhandler_register(NULL, "system_resume_phase4", &patch_debug_dipsw, NULL, EVENTHANDLER_PRI_LAST); // TODO: Varies per FW
+  // TODO: Varies per FW
+  // eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, NULL, EVENTHANDLER_PRI_PRE_FIRST); // < 5.50
+  // eventhandler_register(NULL, "system_resume_phase4", &patch_debug_dipsw, NULL, EVENTHANDLER_PRI_LAST); // < 5.50
+  // eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, "hen_resume_patches", NULL, EVENTHANDLER_PRI_PRE_FIRST); // 5.50+ (Any changes after 6.72?)
+  eventhandler_register(NULL, "system_resume_phase4", &apply_patches, "hen_resume_patches", NULL, EVENTHANDLER_PRI_LAST); // 5.50+ (Any changes after 6.72?)
 }

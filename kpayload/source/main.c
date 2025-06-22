@@ -25,7 +25,9 @@ void *(*memcpy)(void *dst, const void *src, size_t len)PAYLOAD_BSS;
 void *(*memset)(void *s, int c, size_t n)PAYLOAD_BSS;
 size_t (*strlen)(const char *str) PAYLOAD_BSS;
 int (*printf)(const char *fmt, ...) PAYLOAD_BSS;
-void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS;
+// TODO: Varies per FW
+// void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS; // < 5.50
+void (*eventhandler_register)(void *list, const char *name, void *func, void *key, void *arg, int priority) PAYLOAD_BSS; // 5.50+ (Any changes after 6.72?)
 
 void *M_TEMP PAYLOAD_BSS;
 uint8_t *MINI_SYSCORE_SELF_BINARY PAYLOAD_BSS;
@@ -148,14 +150,13 @@ PAYLOAD_CODE void resolve_kdlsym() {
   resolve(vm_map_lookup_entry);
 }
 
-PAYLOAD_CODE void my_entrypoint() {
-  // TODO: Get firmware version and pass to the functions below
+PAYLOAD_CODE int my_entrypoint() {
   resolve_kdlsym();
   install_fself_hooks();
   install_fpkg_hooks();
   install_patches();
-  install_syscall_hooks();
-  shellcore_patch();
+
+  return 0;
 }
 
 struct {

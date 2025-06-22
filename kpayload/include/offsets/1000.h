@@ -6,7 +6,7 @@
 // data
 #define XFAST_SYSCALL_addr              0x000001C0
 #define M_TEMP_addr                     0x01532C00
-#define MINI_SYSCORE_SELF_BINARY_addr   0x00D5EC48
+#define MINI_SYSCORE_SELF_BINARY_addr   0x0155EC48
 #define ALLPROC_addr                    0x022D9B40
 #define SBL_DRIVER_MAPPED_PAGES_addr    0x02646258
 #define SBL_PFS_SX_addr                 0x0267C088
@@ -111,7 +111,7 @@
 #define enable_data_mount_patch         0x0031B310
 
 // SceShellCore patches - enable VR without spoof
-#define enable_psvr_patch               0x00D39B4F
+#define enable_psvr_patch               0x00D919E0
 
 // SceShellCore patches - enable fpkg
 #define enable_fpkg_patch               0x003D26AF
@@ -124,9 +124,9 @@
 #define ext_hdd_patch                   0x00604FFD
 
 // SceShellCore patches - enable debug trophies
-#define debug_trophies_patch            0x007342E9
+#define debug_trophies_patch            0x00738319
 
 // SceShellCore patches - disable screenshot block
-#define disable_screenshot_patch        0x00389FE6
+#define disable_screenshot_patch        0x000CF8B6
 
 #endif

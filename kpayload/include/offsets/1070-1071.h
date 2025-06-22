@@ -111,7 +111,7 @@
 #define enable_data_mount_patch         0x0031E890
 
 // SceShellCore patches - enable VR without spoof
-#define enable_psvr_patch               0x00D3E55F
+#define enable_psvr_patch               0x00D962D0
 
 // SceShellCore patches - enable fpkg
 #define enable_fpkg_patch               0x003D544F
@@ -124,9 +124,9 @@
 #define ext_hdd_patch                   0x00606B7D
 
 // SceShellCore patches - enable debug trophies
-#define debug_trophies_patch            0x007365F9
+#define debug_trophies_patch            0x0073A629
 
 // SceShellCore patches - disable screenshot block
-#define disable_screenshot_patch        0x0038C686
+#define disable_screenshot_patch        0x000CF876
 
 #endif

@@ -12,6 +12,59 @@
 extern char kpayload[];
 extern unsigned kpayload_size;
 
+#define DEFAULT_DISABLE_ASLR 1 // Disable ASLR by default
+#define DEFAULT_NOBD_PATCHES 0 // Skip NoBD patches by default
+#define TARGET_ID_SIZE 4 // eg. 0x84
+
+typedef struct {
+  int disable_aslr;
+  int nobd_patches;
+  char target_id[TARGET_ID_SIZE + 1]; // Add null term
+} configuration;
+
+// The return values are flipped in this function compared to the rest of this
+// file becuase the INI lib expects it that way
+int config_handler(void *config, const char *name, const char *value) {
+  configuration *config_p = (configuration *)config;
+
+#define MATCH(n) strcmp(name, n) == 0
+  if (MATCH("disable_aslr")) {
+    int temp = atoi(value);
+    if (temp != 0 && temp != 1) {
+      printf_notification("ERROR: Invalid disable_aslr:\n    Must be 0 or 1");
+      config_p->disable_aslr = DEFAULT_DISABLE_ASLR;
+    } else {
+      config_p->disable_aslr = temp;
+    }
+  } else if (MATCH("nobd_patches")) {
+    int temp = atoi(value);
+    if (temp != 0 && temp != 1) {
+      printf_notification("ERROR: Invalid nobd_patches:\n    Must be 0 or 1");
+      config_p->nobd_patches = DEFAULT_NOBD_PATCHES;
+    } else {
+      config_p->nobd_patches = temp;
+    }
+  } else if (MATCH("target_id")) {
+    if (strlen(value) == 1 && value[0] == '0') {
+      memset(config_p->target_id, '\0', sizeof(config_p->target_id));
+    } else if (strlen(value) != TARGET_ID_SIZE) {
+      printf_notification("ERROR: Malformed target_id:\n    Must be %i bytes (e.g. 0x84)", TARGET_ID_SIZE);
+    } else if (value[0] != '0' || value[1] != 'x' || !isxdigit(value[2]) || !isxdigit(value[3])) {
+      printf_notification("ERROR: Malformed target_id:\n    Incorrect format, must be 0x?? (e.g. 0x84)");
+    } else if (!((tolower(value[2]) == '8' && ((value[3] >= '0' && value[3] <= '9') || (tolower(value[3]) >= 'a' && tolower(value[3]) <= 'f'))) || (tolower(value[2]) == 'a' && value[3] == '0'))) {
+      // Trust the clusterfuck of an if statement above is correct
+      printf_notification("ERROR: Unknown target_id:\n    Only 0x80-0x8F and 0xA0 are valid");
+    } else {
+      memcpy(config_p->target_id, value, TARGET_ID_SIZE);
+      config_p->target_id[TARGET_ID_SIZE] = '\0';
+    }
+  } else {
+    return 0;
+  }
+
+  return 1;
+}
+
 // Return 0 on success
 // Return -1 on unsupported firmware error
 // Can also just give a memory error in the browser or panic the console on failure
@@ -249,85 +302,68 @@ int install_payload() {
 
 // Return 0 on "success" including no file found
 // Return -1 on error
-int read_set_target_id() {
-  int fd = open("/mnt/usb0/target.id", O_RDONLY, 0);
-  if (fd < 0) {
-    // No file found, assume they just don't have one on purpose
-    return 0;
-  }
-
-  char hexstring[5] = {0};
-  int bytes_read = read(fd, hexstring, 4);
-  close(fd);
-  if (bytes_read != 4) {
-    printf_notification("ERROR: Malformed target.id:\n    Must be 4 bytes (e.g. 0x84)");
-    return -1;
-  }
-  if (hexstring[0] != '0' || hexstring[1] != 'x' || !isxdigit(hexstring[2]) || !isxdigit(hexstring[3])) {
-    printf_notification("ERROR: Malformed target.id:\n    Incorrect format, must be 0x?? (e.g. 0x84)");
-    return -1;
-  }
-
+int set_target_id(char *tid) {
+  // The function input is from a controlled source and is already checked
   int hex;
-  sscanf(hexstring, "%x", &hex);
+  sscanf(tid, "%x", &hex);
 
   // Longest string for this buffer is 23 chars + 1 null term
   char buffer[0x100] = {0};
   int buffer_size = sizeof(buffer);
   switch (hex) {
   case 0x80:
-    snprintf_s(buffer, buffer_size, "Diagnostic");
+    snprintf(buffer, buffer_size, "Diagnostic");
     break;
   case 0x81:
-    snprintf_s(buffer, buffer_size, "Devkit");
+    snprintf(buffer, buffer_size, "Devkit");
     break;
   case 0x82:
-    snprintf_s(buffer, buffer_size, "Testkit");
+    snprintf(buffer, buffer_size, "Testkit");
     break;
   case 0x83:
-    snprintf_s(buffer, buffer_size, "Japan");
+    snprintf(buffer, buffer_size, "Japan");
     break;
   case 0x84:
-    snprintf_s(buffer, buffer_size, "USA");
+    snprintf(buffer, buffer_size, "USA");
     break;
   case 0x85:
-    snprintf_s(buffer, buffer_size, "Europe");
+    snprintf(buffer, buffer_size, "Europe");
     break;
   case 0x86:
-    snprintf_s(buffer, buffer_size, "Korea");
+    snprintf(buffer, buffer_size, "Korea");
     break;
   case 0x87:
-    snprintf_s(buffer, buffer_size, "United Kingdom");
+    snprintf(buffer, buffer_size, "United Kingdom");
     break;
   case 0x88:
-    snprintf_s(buffer, buffer_size, "Mexico");
+    snprintf(buffer, buffer_size, "Mexico");
     break;
   case 0x89:
-    snprintf_s(buffer, buffer_size, "Australia & New Zealand");
+    snprintf(buffer, buffer_size, "Australia & New Zealand");
     break;
   case 0x8A:
-    snprintf_s(buffer, buffer_size, "South Asia");
+    snprintf(buffer, buffer_size, "South Asia");
     break;
   case 0x8B:
-    snprintf_s(buffer, buffer_size, "Taiwan");
+    snprintf(buffer, buffer_size, "Taiwan");
     break;
   case 0x8C:
-    snprintf_s(buffer, buffer_size, "Russia");
+    snprintf(buffer, buffer_size, "Russia");
     break;
   case 0x8D:
-    snprintf_s(buffer, buffer_size, "China");
+    snprintf(buffer, buffer_size, "China");
     break;
   case 0x8E:
-    snprintf_s(buffer, buffer_size, "Hong Kong");
+    snprintf(buffer, buffer_size, "Hong Kong");
     break;
   case 0x8F:
-    snprintf_s(buffer, buffer_size, "Brazil");
+    snprintf(buffer, buffer_size, "Brazil");
     break;
   case 0xA0:
-    snprintf_s(buffer, buffer_size, "Kratos");
+    snprintf(buffer, buffer_size, "Kratos");
     break;
   default:
-    printf_notification("Spoofing: UNKNOWN...\nCheck your `/mnt/usb0/target.id` file");
+    printf_notification("Spoofing: UNKNOWN...\nCheck your `hen.ini` file");
     return -1;
   }
 
@@ -354,17 +390,56 @@ int _main(struct thread *td) {
   // Jailbreak the process
   jailbreak();
 
+  // Unmount update directory. From etaHEN
+  if ((int)unmount("/update", 0x80000LL) < 0) {
+    unmount("/update", 0);
+  }
+
   // Apply all HEN kernel patches
   install_patches();
   mmap_patch();
 
-  // If `/mnt/usb0/enable.aslr` exists, don't disable userland ASLR
-  if (file_exists("/mnt/usb0/enable.aslr")) {
-    disable_aslr();
+  // Get config, if it exists
+  int config_loaded = 0;
+  configuration config;
+  memset(&config, '\0', sizeof(config));
+  config.disable_aslr = DEFAULT_DISABLE_ASLR;
+  config.nobd_patches = DEFAULT_NOBD_PATCHES;
+  if (file_exists("/mnt/usb0/hen.ini")) {
+    if (cfg_parse("/mnt/usb0/hen.ini", config_handler, &config) < 0) {
+      printf_notification("ERROR: Unable to load `/mnt/usb0/hen.ini`");
+      // Restore defaults in case one of them changed for some reason...
+      memset(&config, '\0', sizeof(config));
+      config.disable_aslr = DEFAULT_DISABLE_ASLR;
+      config.nobd_patches = DEFAULT_NOBD_PATCHES;
+    } else {
+      if (!file_compare("/mnt/usb0/hen.ini", "/data/hen.ini")) {
+        unlink("/data/hen.ini");
+        copy_file("/mnt/usb0/hen.ini", "/data/hen.ini");
+      }
+      config_loaded = 1;
+    }
+  } else if (file_exists("/data/hen.ini")) {
+    if (cfg_parse("/data/hen.ini", config_handler, &config) < 0) {
+      printf_notification("ERROR: Unable to load `/data/hen.ini`");
+      // Restore defaults in case one of them changed for some reason...
+      memset(&config, '\0', sizeof(config));
+      config.disable_aslr = DEFAULT_DISABLE_ASLR;
+      config.nobd_patches = DEFAULT_NOBD_PATCHES;
+    } else {
+      config_loaded = 1;
+    }
   }
 
-  // If `/mnt/usb0/no.bd` exists, patch for the NoBD update method
-  if (file_exists("/mnt/usb0/no.bd")) {
+  if (config.disable_aslr) {
+    disable_aslr();
+    // Only show ASLR popup if config file is read
+    if (config_loaded) {
+      printf_notification("Userland ASLR disabled");
+    }
+  }
+
+  if (config.nobd_patches) {
     no_bd_patch();
     printf_notification("NoBD patches enabled");
   }
@@ -373,10 +448,8 @@ int _main(struct thread *td) {
   install_payload();
 
   // Do this after the kpayload so if the user spoofs it doesn't effect checks in the kpayload
-  // If `/mnt/usb0/target.id` exists, patch the target ID to the value in the file (eg. 0x84)
-  // Valid values: 0x80-0x8F and 0xA0
-  if (file_exists("/mnt/usb0/target.id")) {
-    read_set_target_id();
+  if (config.target_id[0] != '\0') {
+    set_target_id(config.target_id);
   }
 
   printf_notification("Welcome to HEN %s", VERSION);
