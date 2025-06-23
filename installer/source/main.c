@@ -376,6 +376,41 @@ int set_target_id(char *tid) {
   return 0;
 }
 
+// clang-format off
+static const
+#include "plugin_bootloader.prx.inc"
+static const
+#include "plugin_loader.prx.inc"
+static const
+#include "plugin_server.prx.inc"
+// clang-format on
+
+static void write_blob(const char* path, const void* blob, const size_t blobsz) {
+  int fd = open(path, O_CREAT | O_RDWR, 0777);
+  printf_debug("fd %s %d\n", path, fd);
+  if (fd > 0) {
+    write(fd, blob,blobsz);
+    close(fd);
+  } else {
+    printf_notification("Failed to write %s!\nFile descriptor %d", path, fd);
+  }
+}
+
+static void upload_prx_to_disk(void) {
+  write_blob("/user/data/plugin_bootloader.prx", plugin_bootloader_prx, sizeof(plugin_bootloader_prx));
+  write_blob("/user/data/plugin_loader.prx", plugin_loader_prx, sizeof(plugin_loader_prx));
+  write_blob("/user/data/plugin_server.prx", plugin_server_prx, sizeof(plugin_server_prx));
+}
+
+static void kill_party(void) {
+  static char proc[] = "ScePartyDaemon";
+  int party = findProcess(proc);
+  printf_debug("%s %d\n", proc, party);
+  if (party > 0) {
+    kill(party, SIGKILL);
+  }
+}
+
 int _main(struct thread *td) {
   UNUSED(td);
 
@@ -451,6 +486,10 @@ int _main(struct thread *td) {
   if (config.target_id[0] != '\0') {
     set_target_id(config.target_id);
   }
+
+  // TODO: Option to enable/disable
+  upload_prx_to_disk();
+  kill_party();
 
   printf_notification("Welcome to HEN %s", VERSION);
 
