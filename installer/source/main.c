@@ -277,10 +277,10 @@ int kpayload_install_payload(struct thread *td, struct kpayload_install_payload_
   // Restore write protection
   writeCr0(cr0);
 
-  int (*payload_entrypoint)();
+  int (*payload_entrypoint)(uint16_t);
   *((void **)&payload_entrypoint) = (void *)(&payload_buffer[payload_header->entrypoint_offset]);
 
-  return payload_entrypoint();
+  return payload_entrypoint(fw_version);
 }
 
 // Passes on the result of kpayload_patches

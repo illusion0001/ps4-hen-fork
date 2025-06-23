@@ -45,8 +45,8 @@ PAYLOAD_CODE static inline __attribute__((always_inline)) void intr_restore(uint
   __asm__ volatile("push %0; popf;" : : "rm"(flags) : "memory");
 }
 
-PAYLOAD_CODE static inline __attribute__((always_inline)) uint64_t getkernbase(void) {
-  return (__readmsr(0xC0000082) - (uint64_t)XFAST_SYSCALL_addr);
+PAYLOAD_CODE static inline __attribute__((always_inline)) uint64_t getkernbase(uint64_t xfast_syscall_offset) {
+  return (__readmsr(0xC0000082) - xfast_syscall_offset);
 }
 
 #endif

@@ -11,12 +11,14 @@
 #include "ccp_helper.h"
 #include "amd_helper.h"
 
+extern const struct kpayload_offsets *fw_offsets PAYLOAD_BSS;
+
 extern int (*_sx_xlock)(struct sx *sx, int opts, const char *file, int line) PAYLOAD_BSS;
 extern int (*_sx_xunlock)(struct sx *sx) PAYLOAD_BSS;
 extern int (*fpu_kern_enter)(struct thread *td, struct fpu_kern_ctx *ctx, uint32_t flags) PAYLOAD_BSS;
 extern int (*fpu_kern_leave)(struct thread *td, struct fpu_kern_ctx *ctx) PAYLOAD_BSS;
-extern void *(*memcpy)(void *dst, const void *src, size_t len)PAYLOAD_BSS;
-extern void *(*memset)(void *s, int c, size_t n)PAYLOAD_BSS;
+extern void *(*memcpy)(void *dst, const void *src, size_t len) PAYLOAD_BSS;
+extern void *(*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
 
 extern struct sbl_map_list_entry **SBL_DRIVER_MAPPED_PAGES PAYLOAD_BSS;
 extern struct sx *SBL_PFS_SX PAYLOAD_BSS;
@@ -450,18 +452,18 @@ done:
 
 PAYLOAD_CODE void install_fpkg_hooks() {
   uint64_t flags, cr0;
-  uint64_t kernbase = getkernbase();
+  uint64_t kernbase = getkernbase(fw_offsets->XFAST_SYSCALL_addr);
 
   cr0 = readCr0();
   writeCr0(cr0 & ~X86_CR0_WP);
   flags = intr_disable();
 
-  KCALL_REL32(kernbase, sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif_hook, (uint64_t)my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif);
-  KCALL_REL32(kernbase, sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new_hook, (uint64_t)my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new);
-  KCALL_REL32(kernbase, sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg_hook, (uint64_t)my_sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg);
-  KCALL_REL32(kernbase, sceSblKeymgrInvalidateKey__sx_xlock_hook, (uint64_t)my_sceSblKeymgrInvalidateKey__sx_xlock);
-  KCALL_REL32(kernbase, mountpfs__sceSblPfsSetKeys_hook1, (uint64_t)my_mountpfs__sceSblPfsSetKeys);
-  KCALL_REL32(kernbase, mountpfs__sceSblPfsSetKeys_hook2, (uint64_t)my_mountpfs__sceSblPfsSetKeys);
+  KCALL_REL32(kernbase, fw_offsets->sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif_hook, (uint64_t)my_sceSblKeymgrSmCallfunc_npdrm_decrypt_isolated_rif);
+  KCALL_REL32(kernbase, fw_offsets->sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new_hook, (uint64_t)my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new);
+  KCALL_REL32(kernbase, fw_offsets->sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg_hook, (uint64_t)my_sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg);
+  KCALL_REL32(kernbase, fw_offsets->sceSblKeymgrInvalidateKey__sx_xlock_hook, (uint64_t)my_sceSblKeymgrInvalidateKey__sx_xlock);
+  KCALL_REL32(kernbase, fw_offsets->mountpfs__sceSblPfsSetKeys_hook1, (uint64_t)my_mountpfs__sceSblPfsSetKeys);
+  KCALL_REL32(kernbase, fw_offsets->mountpfs__sceSblPfsSetKeys_hook2, (uint64_t)my_mountpfs__sceSblPfsSetKeys);
 
   intr_restore(flags);
   writeCr0(cr0);

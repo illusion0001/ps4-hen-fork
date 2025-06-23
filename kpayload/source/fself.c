@@ -12,10 +12,12 @@
 
 #define PAGE_SIZE 0x4000
 
-extern void *(*malloc)(unsigned long size, void *type, int flags)PAYLOAD_BSS;
+extern const struct kpayload_offsets *fw_offsets PAYLOAD_BSS;
+
+extern void *(*malloc)(unsigned long size, void *type, int flags) PAYLOAD_BSS;
 extern void (*free)(void *addr, void *type) PAYLOAD_BSS;
-extern char *(*strstr)(const char *haystack, const char *needle)PAYLOAD_BSS;
-extern void *(*memcpy)(void *dst, const void *src, size_t len)PAYLOAD_BSS;
+extern char *(*strstr)(const char *haystack, const char *needle) PAYLOAD_BSS;
+extern void *(*memcpy)(void *dst, const void *src, size_t len) PAYLOAD_BSS;
 extern size_t (*strlen)(const char *str) PAYLOAD_BSS;
 
 extern void *M_TEMP PAYLOAD_BSS;
@@ -356,18 +358,18 @@ PAYLOAD_CODE int my_sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId(const char *pa
 
 PAYLOAD_CODE void install_fself_hooks() {
   uint64_t flags, cr0;
-  uint64_t kernbase = getkernbase();
+  uint64_t kernbase = getkernbase(fw_offsets->XFAST_SYSCALL_addr);
 
   cr0 = readCr0();
   writeCr0(cr0 & ~X86_CR0_WP);
   flags = intr_disable();
 
-  KCALL_REL32(kernbase, sceSblAuthMgrIsLoadable2_hook, (uint64_t)my_sceSblAuthMgrIsLoadable2);
-  KCALL_REL32(kernbase, sceSblAuthMgrVerifyHeader_hook1, (uint64_t)my_sceSblAuthMgrVerifyHeader);
-  KCALL_REL32(kernbase, sceSblAuthMgrVerifyHeader_hook2, (uint64_t)my_sceSblAuthMgrVerifyHeader);
-  KCALL_REL32(kernbase, sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox_hook, (uint64_t)my_sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox);
-  KCALL_REL32(kernbase, sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox_hook, (uint64_t)my_sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox);
-  KCALL_REL32(kernbase, sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook, (uint64_t)my_sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId);
+  KCALL_REL32(kernbase, fw_offsets->sceSblAuthMgrIsLoadable2_hook, (uint64_t)my_sceSblAuthMgrIsLoadable2);
+  KCALL_REL32(kernbase, fw_offsets->sceSblAuthMgrVerifyHeader_hook1, (uint64_t)my_sceSblAuthMgrVerifyHeader);
+  KCALL_REL32(kernbase, fw_offsets->sceSblAuthMgrVerifyHeader_hook2, (uint64_t)my_sceSblAuthMgrVerifyHeader);
+  KCALL_REL32(kernbase, fw_offsets->sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox_hook, (uint64_t)my_sceSblAuthMgrSmLoadSelfSegment__sceSblServiceMailbox);
+  KCALL_REL32(kernbase, fw_offsets->sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox_hook, (uint64_t)my_sceSblAuthMgrSmLoadSelfBlock__sceSblServiceMailbox);
+  KCALL_REL32(kernbase, fw_offsets->sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId_hook, (uint64_t)my_sceSblAuthMgrIsLoadable__sceSblACMgrGetPathId);
 
   intr_restore(flags);
   writeCr0(cr0);

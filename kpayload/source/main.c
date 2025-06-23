@@ -13,16 +13,18 @@
 #include "ccp_helper.h"
 #include "amd_helper.h"
 
+const struct kpayload_offsets *fw_offsets PAYLOAD_BSS = NULL;
+
 int (*memcmp)(const void *ptr1, const void *ptr2, size_t num) PAYLOAD_BSS;
 int (*_sx_xlock)(struct sx *sx, int opts, const char *file, int line) PAYLOAD_BSS;
 int (*_sx_xunlock)(struct sx *sx) PAYLOAD_BSS;
-void *(*malloc)(unsigned long size, void *type, int flags)PAYLOAD_BSS;
+void *(*malloc)(unsigned long size, void *type, int flags) PAYLOAD_BSS;
 void (*free)(void *addr, void *type) PAYLOAD_BSS;
-char *(*strstr)(const char *haystack, const char *needle)PAYLOAD_BSS;
+char *(*strstr)(const char *haystack, const char *needle) PAYLOAD_BSS;
 int (*fpu_kern_enter)(struct thread *td, struct fpu_kern_ctx *ctx, uint32_t flags) PAYLOAD_BSS;
 int (*fpu_kern_leave)(struct thread *td, struct fpu_kern_ctx *ctx) PAYLOAD_BSS;
-void *(*memcpy)(void *dst, const void *src, size_t len)PAYLOAD_BSS;
-void *(*memset)(void *s, int c, size_t n)PAYLOAD_BSS;
+void *(*memcpy)(void *dst, const void *src, size_t len) PAYLOAD_BSS;
+void *(*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
 size_t (*strlen)(const char *str) PAYLOAD_BSS;
 int (*printf)(const char *fmt, ...) PAYLOAD_BSS;
 // TODO: Varies per FW
@@ -73,7 +75,7 @@ extern int my_sceSblKeymgrSetKeyStorage__sceSblDriverSendMsg(struct sbl_msg *msg
 extern int my_mountpfs__sceSblPfsSetKeys(uint32_t *ekh, uint32_t *skh, uint8_t *eekpfs, struct ekc *eekc, unsigned int pubkey_ver, unsigned int key_ver, struct pfs_header *hdr, size_t hdr_size, unsigned int type, unsigned int finalized, unsigned int is_disc) PAYLOAD_CODE;
 
 // Patch
-struct vmspace *(*vmspace_acquire_ref)(struct proc *p)PAYLOAD_BSS;
+struct vmspace *(*vmspace_acquire_ref)(struct proc *p) PAYLOAD_BSS;
 void (*vmspace_free)(struct vmspace *vm) PAYLOAD_BSS;
 void (*vm_map_lock_read)(struct vm_map *map) PAYLOAD_BSS;
 void (*vm_map_unlock_read)(struct vm_map *map) PAYLOAD_BSS;
@@ -84,14 +86,11 @@ int (*proc_rwmem)(struct proc *p, struct uio *uio) PAYLOAD_BSS;
 extern void install_fself_hooks(void) PAYLOAD_CODE;
 extern void install_fpkg_hooks(void) PAYLOAD_CODE;
 extern void install_patches(void) PAYLOAD_CODE;
-extern void install_fake_signout_patch(void) PAYLOAD_CODE;
-extern void install_syscall_hooks(void) PAYLOAD_CODE;
-extern void shellcore_patch(void) PAYLOAD_CODE;
 
-#define resolve(name) name = (void *)(kernbase + name##_addr)
+#define resolve(name) name = (void *)(kernbase + fw_offsets->name##_addr)
 
 PAYLOAD_CODE void resolve_kdlsym() {
-  uint64_t kernbase = getkernbase();
+  uint64_t kernbase = getkernbase(fw_offsets->XFAST_SYSCALL_addr);
 
   // data
   resolve(M_TEMP);
@@ -150,8 +149,13 @@ PAYLOAD_CODE void resolve_kdlsym() {
   resolve(vm_map_lookup_entry);
 }
 
-PAYLOAD_CODE int my_entrypoint() {
+PAYLOAD_CODE int my_entrypoint(uint16_t fw_version) {
+  fw_offsets = get_offsets_for_fw(fw_version);
+  if (!fw_offsets) {
+    return -1;
+  }
   resolve_kdlsym();
+  printf("Hello from KPayload: %i\n", fw_version);
   install_fself_hooks();
   install_fpkg_hooks();
   install_patches();

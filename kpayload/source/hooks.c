@@ -15,11 +15,11 @@
 
 #include "hooks.h"
 
-extern void *(*memset)(void *s, int c, size_t n)PAYLOAD_BSS;
-extern void *(*memcpy)(void *dst, const void *src, size_t len)PAYLOAD_BSS;
+extern void *(*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
+extern void *(*memcpy)(void *dst, const void *src, size_t len) PAYLOAD_BSS;
 extern int (*proc_rwmem)(struct proc *p, struct uio *uio) PAYLOAD_BSS;
 
-extern struct vmspace *(*vmspace_acquire_ref)(struct proc *p)PAYLOAD_BSS;
+extern struct vmspace *(*vmspace_acquire_ref)(struct proc *p) PAYLOAD_BSS;
 extern void (*vmspace_free)(struct vmspace *vm) PAYLOAD_BSS;
 extern void (*vm_map_lock_read)(struct vm_map *map) PAYLOAD_BSS;
 extern void (*vm_map_unlock_read)(struct vm_map *map) PAYLOAD_BSS;
