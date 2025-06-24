@@ -5,7 +5,6 @@
 /installer/*.bin
 /installer/*.map
 
-
 /kpayload/build/
 /kpayload/*.bin
 /kpayload/*.map
