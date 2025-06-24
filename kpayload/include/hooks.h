@@ -146,4 +146,17 @@ int sys_console_cmd(struct thread *td, struct sys_console_cmd_args *uap);
 void install_syscall(uint32_t n, void *func);
 int install_hooks();
 
+struct dynlib_load_prx_args {
+  const char *prx_path;
+  int flags;
+  int *handle_out;
+  uint64_t unk;
+};
+
+struct dynlib_dlsym_args {
+  int module;
+  const char *symbol;
+  uintptr_t *symbol_ptr;
+};
+
 #endif
