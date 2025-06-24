@@ -279,7 +279,7 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     uintptr_t plugin_load_ptr = 0;
     dlsym_wrap(td, handle, "plugin_load", &plugin_load_ptr);
     if (init_env_ptr && plugin_load_ptr) {
-      static uint8_t jmp[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
+      static uint8_t jmp[] PAYLOAD_RDATA = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
       proc_rw_mem(td->td_proc, (void *)init_env_ptr, sizeof(jmp), jmp, 0, 1);
       proc_rw_mem(td->td_proc, (void *)(init_env_ptr + sizeof(jmp)), sizeof(plugin_load_ptr), &plugin_load_ptr, 0, 1);
     }
@@ -296,7 +296,7 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     uintptr_t plugin_load_ptr = 0;
     dlsym_wrap(td, handle, "plugin_load", &plugin_load_ptr);
     if (init_env_ptr && plugin_load_ptr) {
-      static uint8_t jmp[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
+      static uint8_t jmp[] PAYLOAD_RDATA = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
       proc_rw_mem(td->td_proc, (void *)init_env_ptr, sizeof(jmp), jmp, 0, 1);
       proc_rw_mem(td->td_proc, (void *)(init_env_ptr + sizeof(jmp)), sizeof(plugin_load_ptr), &plugin_load_ptr, 0, 1);
     }
