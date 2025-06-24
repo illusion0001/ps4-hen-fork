@@ -15,7 +15,7 @@ cd ..
 
 mkdir -p tmp
 cd tmp
-curl -fLJO https://github.com/illusion0001/ps4-hen-plugins/releases/latest/download/plugins.zip
+curl -fLJO https://github.com/Scene-Collective/ps4-hen-plugins/releases/latest/download/plugins.zip
 unzip plugins.zip
 for file in *.prx; do xxd -i "$file" > "../installer/include/${file}.inc"; done
 cd ..
