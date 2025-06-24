@@ -376,15 +376,6 @@ int set_target_id(char *tid) {
   return 0;
 }
 
-// clang-format off
-static const
-#include "plugin_bootloader.prx.inc"
-static const
-#include "plugin_loader.prx.inc"
-static const
-#include "plugin_server.prx.inc"
-// clang-format on
-
 static void write_blob(const char* path, const void* blob, const size_t blobsz) {
   int fd = open(path, O_CREAT | O_RDWR, 0777);
   printf_debug("fd %s %d\n", path, fd);
@@ -396,10 +387,20 @@ static void write_blob(const char* path, const void* blob, const size_t blobsz) 
   }
 }
 
+#define bl(n) \
+    extern unsigned char* n;     \
+    extern unsigned int n##_len
+
+bl(plugin_bootloader_prx);
+bl(plugin_loader_prx);
+bl(plugin_server_prx);
+
+#undef bl
+
 static void upload_prx_to_disk(void) {
-  write_blob("/user/data/plugin_bootloader.prx", plugin_bootloader_prx, sizeof(plugin_bootloader_prx));
-  write_blob("/user/data/plugin_loader.prx", plugin_loader_prx, sizeof(plugin_loader_prx));
-  write_blob("/user/data/plugin_server.prx", plugin_server_prx, sizeof(plugin_server_prx));
+  write_blob("/user/data/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
+  write_blob("/user/data/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
+  write_blob("/user/data/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
 }
 
 static void kill_party(void) {
