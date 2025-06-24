@@ -1,0 +1,28 @@
+---
+name: "Build Release"
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+
+jobs:
+  build:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build with PS4 Payload SDK
+        uses: Scene-Collective/ps4-payload-sdk@main
+        with:
+          app_path: .
+          build_command: sh build.sh
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifactErrorsFailBuild: true
+          artifacts: hen.bin
+          makeLatest: true

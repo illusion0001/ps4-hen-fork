@@ -1,15 +1,18 @@
-name: Build Project
+---
+name: "Sanity Check"
 
 on:
+  workflow_dispatch:
   push:
   pull_request:
 
 jobs:
   build:
+    if: github.ref_type != 'tag'
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Build with PS4 Payload SDK
         uses: Scene-Collective/ps4-payload-sdk@main
         with:
