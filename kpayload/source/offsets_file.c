@@ -37,17 +37,17 @@
 // #include "offsets/950.h"
 // #include "offsets/951.h"
 // #include "offsets/960.h"
-// #include "offsets/1000.h"
-// #include "offsets/1001.h"
-// #include "offsets/1050.h"
-// #include "offsets/1070.h"
-// #include "offsets/1071.h"
-// #include "offsets/1100.h"
-// #include "offsets/1102.h"
+#include "offsets/1000.h"
+#include "offsets/1001.h"
+#include "offsets/1050.h"
+#include "offsets/1070.h"
+#include "offsets/1071.h"
+#include "offsets/1100.h"
+#include "offsets/1102.h"
 #include "offsets/1150.h"
-// #include "offsets/1152.h"
-// #include "offsets/1200.h"
-// #include "offsets/1202.h"
+#include "offsets/1152.h"
+#include "offsets/1200.h"
+#include "offsets/1202.h"
 
 struct fw_offsets_entry {
   uint16_t fw_version;
@@ -95,19 +95,30 @@ static const struct fw_offsets_entry offsets_table[] PAYLOAD_RDATA = {
   // { 1050, &offsets_1050 },
   // { 1070, &offsets_1070 },
   // { 1071, &offsets_1071 },
-  // { 1100, &offsets_1100 },
-  // { 1102, &offsets_1102 },
+  { 1100, &offsets_1100 },
+  { 1102, &offsets_1102 },
   { 1150, &offsets_1150 },
-  // { 1152, &offsets_1152 },
+  { 1152, &offsets_1152 },
   // { 1200, &offsets_1200 },
   // { 1202, &offsets_1202 },
 };
 
 PAYLOAD_CODE const struct kpayload_offsets *get_offsets_for_fw(uint16_t fw_version) {
-  for (size_t i = 0; i < sizeof(offsets_table) / sizeof(offsets_table[0]); ++i) {
+  const size_t table_size = sizeof(offsets_table) / sizeof(offsets_table[0]);
+
+  if (table_size == 0) {
+    return NULL;
+  }
+
+  for (size_t i = 0; i < table_size; i++) {
+    if (offsets_table[i].offsets == NULL) {
+      continue;
+    }
+
     if (offsets_table[i].fw_version == fw_version) {
       return offsets_table[i].offsets;
     }
   }
+
   return NULL;
 }
