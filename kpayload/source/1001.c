@@ -82,8 +82,8 @@ const struct kpayload_offsets offsets_1001 PAYLOAD_RDATA = {
   .sceSblRcMgrIsStoreMode_patch                              = 0x0001D1B0,
 
   // SceShellUI patches - remote play patches
-  .CreateUserForIDU_patch                                    = 0x00185E90,
-  .remote_play_menu_patch                                    = 0x00EC2282,
+  .CreateUserForIDU_patch                                    = 0x00185E90, // system_ex\app\NPXS20001\eboot.bin
+  .remote_play_menu_patch                                    = 0x00EC2282, // system_ex\app\NPXS20001\psm\Application\app.exe.sprx
 
   // SceRemotePlay patches - remote play patches - system\vsh\app\NPXS21006
   .SceRemotePlay_patch1                                      = 0x000ECB55,
