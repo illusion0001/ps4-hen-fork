@@ -20,7 +20,7 @@
 // #include "offsets/651.h"
 // #include "offsets/670.h"
 // #include "offsets/671.h"
-// #include "offsets/672.h"
+#include "offsets/672.h"
 // #include "offsets/700.h"
 // #include "offsets/701.h"
 // #include "offsets/702.h"
@@ -53,6 +53,8 @@
 
 PAYLOAD_CODE const struct kpayload_offsets *get_offsets_for_fw(uint16_t fw_version) {
   switch (fw_version) {
+    case 672:
+      return &offsets_672;
     case 755:
       return &offsets_755;
     case 900:
