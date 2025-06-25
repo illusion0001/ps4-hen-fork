@@ -7,7 +7,7 @@
 // #include "offsets/500.h"
 // #include "offsets/501.h"
 // #include "offsets/503.h"
-// #include "offsets/505.h"
+#include "offsets/505.h"
 // #include "offsets/507.h"
 // #include "offsets/550.h"
 // #include "offsets/553.h"
@@ -21,22 +21,22 @@
 // #include "offsets/670.h"
 // #include "offsets/671.h"
 #include "offsets/672.h"
-// #include "offsets/700.h"
-// #include "offsets/701.h"
-// #include "offsets/702.h"
-// #include "offsets/750.h"
-// #include "offsets/751.h"
+#include "offsets/700.h"
+#include "offsets/701.h"
+#include "offsets/702.h"
+#include "offsets/750.h"
+#include "offsets/751.h"
 #include "offsets/755.h"
-// #include "offsets/800.h"
-// #include "offsets/801.h"
-// #include "offsets/803.h"
-// #include "offsets/850.h"
-// #include "offsets/852.h"
+#include "offsets/800.h"
+#include "offsets/801.h"
+#include "offsets/803.h"
+#include "offsets/850.h"
+#include "offsets/852.h"
 #include "offsets/900.h"
-// #include "offsets/903.h"
-// #include "offsets/904.h"
-// #include "offsets/950.h"
-// #include "offsets/951.h"
+#include "offsets/903.h"
+#include "offsets/904.h"
+#include "offsets/950.h"
+#include "offsets/951.h"
 #include "offsets/960.h"
 #include "offsets/1000.h"
 #include "offsets/1001.h"
@@ -53,12 +53,42 @@
 
 PAYLOAD_CODE const struct kpayload_offsets *get_offsets_for_fw(uint16_t fw_version) {
   switch (fw_version) {
+    case 505:
+      return &offsets_505;
     case 672:
       return &offsets_672;
+    case 700:
+      return &offsets_700;
+    case 701:
+      return &offsets_701;
+    case 702:
+      return &offsets_702;
+    case 750:
+      return &offsets_750;
+    case 751:
+      return &offsets_751;
     case 755:
       return &offsets_755;
+    case 800:
+      return &offsets_800;
+    case 801:
+      return &offsets_801;
+    case 803:
+      return &offsets_803;
+    case 850:
+      return &offsets_850;
+    case 852:
+      return &offsets_852;
     case 900:
       return &offsets_900;
+    case 903:
+      return &offsets_903;
+    case 904:
+      return &offsets_904;
+    case 950:
+      return &offsets_950;
+    case 951:
+      return &offsets_951;
     case 960:
       return &offsets_960;
     case 1000:
