@@ -21,13 +21,5 @@ jobs:
           gh release list --limit 1000 --json tagName \
           | jq -r '.[].tagName' \
           | while read tag; do
-              gh release delete "$tag" --yes || true
+              gh release delete "$tag" --yes --cleanup-tag || true
             done
-      - name: Delete all tags from remote
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git fetch --tags
-          git tag -l | while read tag; do
-            git push --delete origin "$tag" || true
-          done
