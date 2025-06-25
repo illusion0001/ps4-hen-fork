@@ -35,7 +35,6 @@ jobs:
       - name: Determine release type and tag
         id: vars
         run: |
-          echo "GITHUB_REF: $GITHUB_REF"
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
             echo "is_release=true" >> $GITHUB_OUTPUT
@@ -48,6 +47,7 @@ jobs:
             fi
             echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
             echo "is_release=false" >> $GITHUB_OUTPUT
+            echo "tag_name=$tag_name"
           fi
       - name: Create GitHub release
         if: steps.vars.outputs.is_release == 'true'
