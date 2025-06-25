@@ -39,21 +39,47 @@ jobs:
     permissions:
       contents: write
       actions: write
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@main
-
-      - name: Download artifacts
+        with:
+          fetch-depth: 0
+      - name: Determine release type and tag
+        id: vars
+        run: |
+          echo "GITHUB_REF: $GITHUB_REF"
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            latest_tag=$(git tag --sort=-creatordate | head -n1)
+            if [ -z "$latest_tag" ]; then
+              tag_name="pre-release-${GITHUB_REF##*/}-${GITHUB_RUN_NUMBER}"
+            else
+              tag_name="${latest_tag}-pre-release-${GITHUB_RUN_NUMBER}"
+            fi
+            echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Download artifact
         uses: actions/download-artifact@main
         with:
           name: ${{ env.hen-bin }}
           path: .
-      - name: Release
+      - name: Create GitHub release
+        if: steps.vars.outputs.is_release == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.ref_name }} ${{ env.hen-bin }} --clobber
+        run: |
+          gh release upload "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" --clobber
+      - name: Create GitHub pre-release
+        if: steps.vars.outputs.is_release != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" \
+            --prerelease --title "Pre-release ${{ steps.vars.outputs.tag_name }}" --notes "Automated pre-release"
       - name: Delete uploaded artifact
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
