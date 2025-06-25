@@ -61,4 +61,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" \
-            --prerelease --title "Pre-release ${{ steps.vars.outputs.tag_name }}" --notes "Automated pre-release"
+            --prerelease --title "Pre-release ${{ steps.vars.outputs.tag_name }}"
