@@ -55,12 +55,9 @@ jobs:
         if: steps.vars.outputs.is_release == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" --clobber
+        run: gh release upload "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" --clobber
       - name: Create GitHub pre-release
         if: steps.vars.outputs.is_release != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" \
-            --prerelease --title "Pre-release ${{ steps.vars.outputs.tag_name }}"
+        run: gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" -p
