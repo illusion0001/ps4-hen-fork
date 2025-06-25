@@ -7,7 +7,6 @@ cd ..
 rm -rf tmp
 
 cd installer
-rm include/*.inc
 make clean
 cd ..
 

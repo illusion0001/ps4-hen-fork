@@ -262,11 +262,12 @@ PAYLOAD_CODE static int dlsym_wrap(struct thread *td, int module, const char *sy
 }
 
 PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_prx_args *args) {
-  int r = sys_dynlib_load_prx(td, args);
+  const int r = sys_dynlib_load_prx(td, args);
   // https://github.com/OpenOrbis/mira-project/blob/d8cc5790f08f93267354c2370eb3879edba0aa98/kernel/src/Plugins/Substitute/Substitute.cpp#L1003
   const char *titleid = td->td_proc->titleid;
   const char *p = args->prx_path ? args->prx_path : "";
   printf("%s td_name %s titleid %s prx %s\n", __FUNCTION__, td->td_name, titleid, p);
+  const uint8_t jmp[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
   if (strstr(p, "/app0/sce_module/libc.prx")) {
     const int handle_out = args->handle_out ? *args->handle_out : 0;
     struct dynlib_load_prx_args my_args = {};
@@ -279,7 +280,6 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     uintptr_t plugin_load_ptr = 0;
     dlsym_wrap(td, handle, "plugin_load", &plugin_load_ptr);
     if (init_env_ptr && plugin_load_ptr) {
-      uint8_t jmp[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
       proc_rw_mem(td->td_proc, (void *)init_env_ptr, sizeof(jmp), jmp, 0, 1);
       proc_rw_mem(td->td_proc, (void *)(init_env_ptr + sizeof(jmp)), sizeof(plugin_load_ptr), &plugin_load_ptr, 0, 1);
     }
@@ -296,7 +296,6 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     uintptr_t plugin_load_ptr = 0;
     dlsym_wrap(td, handle, "plugin_load", &plugin_load_ptr);
     if (init_env_ptr && plugin_load_ptr) {
-      uint8_t jmp[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00 };
       proc_rw_mem(td->td_proc, (void *)init_env_ptr, sizeof(jmp), jmp, 0, 1);
       proc_rw_mem(td->td_proc, (void *)(init_env_ptr + sizeof(jmp)), sizeof(plugin_load_ptr), &plugin_load_ptr, 0, 1);
     }

@@ -3,6 +3,12 @@
 ## Features
 - Current Supports 5.05 - 12.02
 - Homebrew Enabler
+- [Plugins System](https://github.com/Scene-Collective/ps4-hen-plugins)
+  - Load PRX into `ScePartyDaemon`
+    - (Starts kernel log server on port 3232, based on [klogsrv](https://github.com/ps5-payload-dev/klogsrv))
+    - (Starts FTP server on port 2121, based on [ftpsrv](https://github.com/ps5-payload-dev/ftpsrv))
+      - **Note: No SELF decryption yet.**
+  - Load PRX into retail apps (on startup in CRT `_init_env`) (You can make your own, the bundled one only prints to TTY for now)
 - Jailbreak
 - Sandbox Escape
 - Debug Settings

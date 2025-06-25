@@ -26,7 +26,7 @@ jobs:
         uses: Scene-Collective/ps4-payload-sdk@main
         with:
           app_path: .
-          build_command: sh build.sh
+          build_command: bash build.sh
       - name: Upload payload artifact
         id: upload
         uses: actions/upload-artifact@main
