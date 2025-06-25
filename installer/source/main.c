@@ -404,11 +404,14 @@ static void upload_prx_to_disk(void) {
 }
 
 static void kill_party(void) {
+  // this was choosen because SceShellCore will try to restart this daemon if it crashes
+  // or manually killed in this case
   static char proc[] = "ScePartyDaemon";
-  int party = findProcess(proc);
+  const int party = findProcess(proc);
   printf_debug("%s %d\n", proc, party);
   if (party > 0) {
-    kill(party, SIGKILL);
+    const int k = kill(party, SIGKILL);
+    printf_debug("sent SIGKILL(%d) to %s(%d)\n", k, proc, party);
   }
 }
 
