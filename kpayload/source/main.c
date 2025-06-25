@@ -13,6 +13,7 @@
 #include "ccp_helper.h"
 #include "amd_helper.h"
 
+uint16_t fw_version PAYLOAD_BSS = 0;
 const struct kpayload_offsets *fw_offsets PAYLOAD_BSS = NULL;
 
 int (*memcmp)(const void *ptr1, const void *ptr2, size_t num) PAYLOAD_BSS;
@@ -27,8 +28,8 @@ void *(*memcpy)(void *dst, const void *src, size_t len) PAYLOAD_BSS;
 void *(*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
 size_t (*strlen)(const char *str) PAYLOAD_BSS;
 int (*printf)(const char *fmt, ...) PAYLOAD_BSS;
-// TODO: Varies per FW
-// void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS; // < 5.50
+// Varies per FW
+void (*eventhandler_register_old)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS; // < 5.50
 void (*eventhandler_register)(void *list, const char *name, void *func, void *key, void *arg, int priority) PAYLOAD_BSS; // 5.50+ (Any changes after 6.72?)
 
 void *M_TEMP PAYLOAD_BSS;
@@ -124,6 +125,7 @@ PAYLOAD_CODE void resolve_kdlsym() {
   resolve(strlen);
   resolve(printf);
   resolve(eventhandler_register);
+  eventhandler_register_old = eventhandler_register;
 
   // Fself
   resolve(sceSblACMgrGetPathId);
@@ -340,7 +342,8 @@ PAYLOAD_CODE static void resolve_patterns(void) {
   writeCr0(cr0);
 }
 
-PAYLOAD_CODE int my_entrypoint(uint16_t fw_version) {
+PAYLOAD_CODE int my_entrypoint(uint16_t fw_version_arg) {
+  fw_version = fw_version_arg;
   fw_offsets = get_offsets_for_fw(fw_version);
   if (!fw_offsets) {
     return -1;

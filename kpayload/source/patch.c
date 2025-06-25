@@ -7,6 +7,7 @@
 #include "freebsd_helper.h"
 #include "amd_helper.h"
 
+extern uint16_t fw_version PAYLOAD_BSS;
 extern const struct kpayload_offsets *fw_offsets PAYLOAD_BSS;
 
 extern int (*proc_rwmem)(struct proc *p, struct uio *uio) PAYLOAD_BSS;
@@ -22,8 +23,8 @@ extern void (*free)(void *addr, void *type) PAYLOAD_BSS;
 extern void *(*memcpy)(void *dst, const void *src, size_t len) PAYLOAD_BSS;
 extern void *(*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
 extern int (*memcmp)(const void *ptr1, const void *ptr2, size_t num) PAYLOAD_BSS;
-// TODO: Varies per FW
-// extern void (*eventhandler_register)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS; // < 5.50
+// Varies per FW
+extern void (*eventhandler_register_old)(void *list, const char *name, void *func, void *arg, int priority) PAYLOAD_BSS; // < 5.50
 extern void (*eventhandler_register)(void *list, const char *name, void *func, void *key, void *arg, int priority) PAYLOAD_BSS; // 5.50+ (Any changes after 6.72?)
 
 extern void *M_TEMP PAYLOAD_BSS;
@@ -212,9 +213,16 @@ PAYLOAD_CODE int shellcore_patch(void) {
   }
 
   // enable fpkg for patches
-  // 5.00-6.20:  "\xE9\x96"
-  // 6.20-12.02: "\xE9\x98"
-  ret = proc_write_mem(ssc, (void *)(text_seg_base + fw_offsets->enable_fpkg_patch), 5, "\xE9\x98\x00\x00\x00", &n); // TODO: Varies per FW
+  // Varies per FW
+  const char *enable_fpkg_patch_data;
+  if (fw_version >= 500 && fw_version <= 620) {
+    enable_fpkg_patch_data = "\xE9\x96\x00\x00\x00";
+  } else if (fw_version >= 650 && fw_version <= 1202) {
+    enable_fpkg_patch_data = "\xE9\x98\x00\x00\x00";
+  } else {
+    enable_fpkg_patch_data = "\xE9\x98\x00\x00\x00";
+  }
+  ret = proc_write_mem(ssc, (void *)(text_seg_base + fw_offsets->enable_fpkg_patch), 5, (void *)enable_fpkg_patch_data, &n);
   if (ret) {
     goto error;
   }
@@ -254,13 +262,14 @@ PAYLOAD_CODE int shellcore_patch(void) {
     goto error;
   }
 
-#if FW < 950
   // check_disc_root_param_patch
-  ret = proc_write_mem(ssc, (void *)(text_seg_base + fw_offsets->check_disc_root_param_patch), 2, "\x90\xE9", &n);
-  if (ret) {
-    goto error;
+  // Varies per FW
+  if (fw_version <= 904) {
+    ret = proc_write_mem(ssc, (void *)(text_seg_base + fw_offsets->check_disc_root_param_patch), 2, "\x90\xE9", &n);
+    if (ret) {
+      goto error;
+    }
   }
-#endif
 
   // app_installer_patch
   ret = proc_write_mem(ssc, (void *)(text_seg_base + fw_offsets->app_installer_patch), 1, "\xEB", &n);
@@ -347,8 +356,22 @@ PAYLOAD_CODE int shellui_patch(void) {
   }
 
   // enable remote play menu - credits to Aida
-  // 10.00-12.02: "\xE9\x5C\x02\x00\x00"
-  ret = proc_write_mem(ssui, (void *)(app_base + fw_offsets->remote_play_menu_patch), 5, "\xE9\x5C\x02\x00\x00", &n); // TODO: Varies per FW
+  // Varies per FW
+  const char *remote_play_patch_data;
+  if (fw_version >= 500 && fw_version <= 507) {
+    remote_play_patch_data = "\xE9\x82\x02\x00\x00";
+  } else if (fw_version >= 550 && fw_version <= 620) {
+    remote_play_patch_data = "\xE9\xB8\x02\x00\x00";
+  } else if (fw_version >= 650 && fw_version <= 904) {
+    remote_play_patch_data = "\xE9\xBA\x02\x00\x00";
+  } else if (fw_version >= 950 && fw_version <= 960) {
+    remote_play_patch_data = "\xE9\xA2\x02\x00\x00";
+  } else if (fw_version >= 1000 && fw_version <= 1202) {
+    remote_play_patch_data = "\xE9\x5C\x02\x00\x00";
+  } else {
+    remote_play_patch_data = "\xE9\x5C\x02\x00\x00";
+  }
+  ret = proc_write_mem(ssui, (void *)(app_base + fw_offsets->remote_play_menu_patch), 5, (void *)remote_play_patch_data, &n);
   if (ret) {
     goto error;
   }
@@ -466,9 +489,13 @@ PAYLOAD_CODE void apply_patches() {
 
 PAYLOAD_CODE void install_patches() {
   apply_patches();
-  // TODO: Varies per FW
-  // eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, NULL, EVENTHANDLER_PRI_PRE_FIRST); // < 5.50
-  // eventhandler_register(NULL, "system_resume_phase4", &patch_debug_dipsw, NULL, EVENTHANDLER_PRI_LAST); // < 5.50
-  // eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, "hen_resume_patches", NULL, EVENTHANDLER_PRI_PRE_FIRST); // 5.50+ (Any changes after 6.72?)
-  eventhandler_register(NULL, "system_resume_phase4", &apply_patches, "hen_resume_patches", NULL, EVENTHANDLER_PRI_LAST); // 5.50+ (Any changes after 6.72?)
+
+  // Varies per FW
+  if (fw_version <= 550) {
+    // eventhandler_register_old(NULL, "system_suspend_phase3", &restore_retail_dipsw, NULL, EVENTHANDLER_PRI_PRE_FIRST); // < 5.50
+    eventhandler_register_old(NULL, "system_resume_phase4", &apply_patches, NULL, EVENTHANDLER_PRI_LAST); // < 5.50
+  } else {
+    // eventhandler_register(NULL, "system_suspend_phase3", &restore_retail_dipsw, "hen_resume_patches", NULL, EVENTHANDLER_PRI_PRE_FIRST); // 5.50+ (Any changes after 6.72?)
+    eventhandler_register(NULL, "system_resume_phase4", &apply_patches, "hen_resume_patches", NULL, EVENTHANDLER_PRI_LAST); // 5.50+ (Any changes after 6.72?)
+  }
 }
