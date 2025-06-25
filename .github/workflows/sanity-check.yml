@@ -65,5 +65,5 @@ jobs:
         if: github.event_name != 'pull_request' && steps.vars.outputs.is_release != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" -p
+        run: gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" --target ${{ github.sha }} -p
 
