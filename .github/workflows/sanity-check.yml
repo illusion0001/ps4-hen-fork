@@ -34,12 +34,14 @@ jobs:
           build_command: bash build.sh
       - name: Determine release type and tag
         id: vars
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
             echo "is_release=true" >> $GITHUB_OUTPUT
           else
-            latest_tag=$(git tag --sort=-creatordate | head -n1)
+            latest_tag=$(gh release view --json tagName --jq .tagName || echo "")
             if [ -z "$latest_tag" ]; then
               tag_name="pre-release-${GITHUB_REF##*/}-${GITHUB_RUN_NUMBER}"
             else
