@@ -20,8 +20,6 @@ jobs:
       contents: write
       actions: write
     runs-on: ubuntu-latest
-    outputs:
-      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@main
@@ -32,7 +30,14 @@ jobs:
         with:
           app_path: .
           build_command: bash build.sh
+      - name: Upload payload artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ env.hen-bin }}
+          path: ${{ env.hen-bin }}
       - name: Determine release type and tag
+        if: github.event_name != 'pull_request'
         id: vars
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,12 +57,12 @@ jobs:
             echo "tag_name=$tag_name"
           fi
       - name: Create GitHub release
-        if: steps.vars.outputs.is_release == 'true'
+        if: github.event_name != 'pull_request' && steps.vars.outputs.is_release == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" --clobber
       - name: Create GitHub pre-release
-        if: steps.vars.outputs.is_release != 'true'
+        if: github.event_name != 'pull_request' && steps.vars.outputs.is_release != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" -p
