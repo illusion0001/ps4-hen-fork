@@ -5,10 +5,12 @@ on:
     paths-ignore:
       - "**/*.md"
       - "**/*.txt"
+      - "**/*.ini"
   pull_request:
     paths-ignore:
       - "**/*.md"
       - "**/*.txt"
+      - "**/*.ini"
   workflow_dispatch:
 
 env:
@@ -16,48 +18,52 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
-    outputs:
-      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@main
+        with:
+          fetch-depth: 0
       - name: Build with PS4 Payload SDK
         uses: Scene-Collective/ps4-payload-sdk@main
         with:
           app_path: .
           build_command: bash build.sh
       - name: Upload payload artifact
-        id: upload
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@main
         with:
           name: ${{ env.hen-bin }}
           path: ${{ env.hen-bin }}
-
-  release:
-    needs: build
-    permissions:
-      contents: write
-      actions: write
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@main
-
-      - name: Download artifacts
-        uses: actions/download-artifact@main
-        with:
-          name: ${{ env.hen-bin }}
-          path: .
-      - name: Release
+      - name: Determine release type and tag
+        if: github.event_name != 'pull_request'
+        id: vars
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.ref_name }} ${{ env.hen-bin }} --clobber
-      - name: Delete uploaded artifact
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api --method DELETE \
-            -H "Accept: application/vnd.github+json" \
-            /repos/${{ github.repository }}/actions/artifacts/${{ needs.build.outputs.artifact-id }}
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            latest_tag=$(gh release view --json tagName --jq .tagName || echo "")
+            if [ -z "$latest_tag" ]; then
+              tag_name="pre-release-${GITHUB_REF##*/}-${GITHUB_RUN_NUMBER}"
+            else
+              tag_name="${latest_tag}-pre-release-${GITHUB_RUN_NUMBER}"
+            fi
+            echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+            echo "tag_name=$tag_name"
+          fi
+      - name: Create GitHub release
+        if: github.event_name != 'pull_request' && steps.vars.outputs.is_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" --clobber
+      - name: Create GitHub pre-release
+        if: github.event_name != 'pull_request' && steps.vars.outputs.is_release != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${{ steps.vars.outputs.tag_name }}" "${{ env.hen-bin }}" --target ${{ github.sha }} -p
