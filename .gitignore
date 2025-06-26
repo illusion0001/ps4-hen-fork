@@ -1,7 +1,7 @@
 /.vscode/
 
 /installer/build/
-/installer/source/**.prx.c
+**/**.inc.c
 /installer/*.bin
 /installer/*.map
 
