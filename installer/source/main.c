@@ -84,7 +84,6 @@ static void set_target_id(char *tid) {
     return;
   }
 
-  printf_notification("Spoofing: %s", buffer);
 }
 
 int _main(struct thread *td) {
@@ -137,7 +136,6 @@ int _main(struct thread *td) {
   if (config.nobd_patches) {
     printf_debug("Installing NoBD patches...\n");
     no_bd_patch();
-    printf_notification("NoBD patches enabled");
   }
 
   // Install and run kpayload
@@ -156,9 +154,8 @@ int _main(struct thread *td) {
 
   printf_notification("Welcome to HEN %s", VERSION);
 
-  // for future use
-  const bool kill_ui = false;
-  const int sleep_sec = kill_ui ? 4 : 1;
+  const bool kill_ui = true;
+  const int sleep_sec = kill_ui ? 5 : 1;
   const int u_to_sec = 1000 * 1000;
   const char *proc = kill_ui ? "SceShellUI" : NULL;
   if (kill_ui) {
