@@ -227,6 +227,75 @@ int kpayload_patches(struct thread *td, struct kpayload_firmware_args *args) {
   return 0;
 }
 
+#define KERNEL_BASE_FILE 0xFFFFFFFF82200000
+
+static void get_memory_dump2(uintptr_t addr, void *out, uint64_t outsz)
+{
+  uint8_t *pout = (uint8_t *)out;
+  uint8_t *paddr = (uint8_t *)addr;
+  for (uint64_t o = 0; o < outsz; o++)
+  {
+    pout[o] = paddr[o];
+  }
+}
+
+static uint64_t get_kernel_size(uint64_t kernel_base)
+{
+  uint16_t elf_header_size;       // ELF header size
+  uint16_t elf_header_entry_size; // ELF header entry size
+  uint16_t num_of_elf_entries;    // Number of entries in the ELF header
+
+  get_memory_dump2(kernel_base + 0x34, &elf_header_size, sizeof(uint16_t));
+  get_memory_dump2(kernel_base + 0x34 + sizeof(uint16_t), &elf_header_entry_size, sizeof(uint16_t));
+  get_memory_dump2(kernel_base + 0x34 + (sizeof(uint16_t) * 2), &num_of_elf_entries, sizeof(uint16_t));
+
+  // printf_debug("elf_header_size: %u bytes\n", elf_header_size);
+  // printf_debug("elf_header_entry_size: %u bytes\n", elf_header_entry_size);
+  // printf_debug("num_of_elf_entries: %u\n", num_of_elf_entries);
+
+  uint64_t max = 0;
+  for (int i = 0; i < num_of_elf_entries; i++)
+  {
+    uint64_t temp_memsz;
+    uint64_t temp_vaddr;
+    uint64_t temp_align;
+    uint64_t temp_max;
+
+    uint64_t memsz_offset = elf_header_size + (i * elf_header_entry_size) + 0x28;
+    uint64_t vaddr_offset = elf_header_size + (i * elf_header_entry_size) + 0x10;
+    uint64_t align_offset = elf_header_size + (i * elf_header_entry_size) + 0x30;
+    get_memory_dump2(kernel_base + memsz_offset, &temp_memsz, sizeof(uint64_t));
+    get_memory_dump2(kernel_base + vaddr_offset, &temp_vaddr, sizeof(uint64_t));
+    get_memory_dump2(kernel_base + align_offset, &temp_align, sizeof(uint64_t));
+
+    temp_vaddr -= kernel_base;
+    temp_vaddr += KERNEL_BASE_FILE;
+
+    temp_max = (temp_vaddr + temp_memsz + (temp_align - 1)) & ~(temp_align - 1);
+
+    if (temp_max > max)
+    {
+      max = temp_max;
+    }
+  }
+
+  return max - KERNEL_BASE_FILE;
+}
+
+static uint64_t *u64_Scan(const void *module, uint64_t sizeOfImage, uint64_t value)
+{
+  uint8_t *scanBytes = (uint8_t *)module;
+  for (size_t i = 0; i < sizeOfImage; ++i)
+  {
+    uint64_t currentValue = *(uint64_t *)&scanBytes[i];
+    if (currentValue == value)
+    {
+      return (uint64_t *)&scanBytes[i];
+    }
+  }
+  return 0;
+}
+
 // Return 0 on success
 // Return -1 on memory allocation error or unsupported firmware error
 // Can also just give a memory error in the browser or panic the console on failure
@@ -249,6 +318,29 @@ int kpayload_install_payload(struct thread *td, struct kpayload_install_payload_
 
   // NOTE: This is a C preprocessor macro
   build_kpayload(fw_version, install_macro);
+
+  const uint64_t kptr = (uint64_t)kernel_ptr;
+  const uint64_t kernelsz = get_kernel_size(kptr);
+  if (!kptr || !kernelsz)
+  {
+    return -1;
+  }
+  const uint64_t SCE_RELA_tag = 0x6100002F;
+  const uintptr_t *sce_reloc = u64_Scan(kernel_base, kernelsz, SCE_RELA_tag);
+  // discard old value
+  payload_buffer = 0;
+  if (sce_reloc)
+  {
+    payload_buffer = (uint8_t *)(kptr + (sce_reloc[1] - KERNEL_BASE_FILE));
+  }
+  else
+  {
+    return -1;
+  }
+  if (!payload_buffer)
+  {
+    return -1;
+  }
 
   uint8_t *payload_data = args->kpayload_payload_info->buffer;
   size_t payload_size = args->kpayload_payload_info->size;
