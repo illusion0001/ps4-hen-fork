@@ -69,6 +69,23 @@ int config_handler(void *config, const char *name, const char *value) {
   return 1;
 }
 
+static void *my_memcpy(void *dst, const void *src, size_t sz)
+{
+  char *d = dst;
+  char *s = src;
+  while (sz--)
+  {
+    *d++ = *s++;
+  }
+  return dst;
+}
+
+#define patch_bytes(a, ...)               \
+  {                                       \
+    const uint8_t temp[] = {__VA_ARGS__}; \
+    my_memcpy(a, temp, sizeof(temp));     \
+  }
+
 // Return 0 on success
 // Return -1 on unsupported firmware error
 // Can also just give a memory error in the browser or panic the console on failure
@@ -113,6 +130,8 @@ int kpayload_patches(struct thread *td, struct kpayload_firmware_args *args) {
   // Enable UART
   kmem = (uint8_t *)uart_patch;
   kmem[0] = 0x00;
+
+  patch_bytes(&kernel_ptr[0xb7b17], 0xeb, 0x3b);
 
   // sceSblACMgrIsDiagProcess
   // kmem = (uint8_t *)is_diag_process_patch;
@@ -489,13 +508,12 @@ static void upload_prx_to_disk(void) {
   write_blob("/user/data/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
 }
 
-static void kill_party(void) {
-  // this was choosen because SceShellCore will try to restart this daemon if it crashes
-  // or manually killed in this case
-  static char proc[] = "ScePartyDaemon";
+static void kill_proc(const char* proc)
+{
   const int party = findProcess(proc);
   printf_debug("%s %d\n", proc, party);
-  if (party > 0) {
+  if (party > 0)
+  {
     const int k = kill(party, SIGKILL);
     printf_debug("sent SIGKILL(%d) to %s(%d)\n", k, proc, party);
   }
@@ -569,6 +587,7 @@ int _main(struct thread *td) {
     printf_notification("NoBD patches enabled");
   }
 
+  // SceShellUI
   // Install and run kpayload
   install_payload();
 
@@ -579,8 +598,9 @@ int _main(struct thread *td) {
 
   // TODO: Option to enable/disable
   upload_prx_to_disk();
-  kill_party();
-
+  // this was choosen because SceShellCore will try to restart this daemon if it crashes
+  // or manually killed in this case
+  kill_proc("ScePartyDaemon");
   printf_notification("Welcome to HEN %s", VERSION);
 
 #ifdef DEBUG_SOCKET
