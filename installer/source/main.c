@@ -478,7 +478,7 @@ int _main(struct thread *td) {
   }
 
   // Install and run kpayload
-  install_payload();
+  printf_notification("install_payload() 0x%x", install_payload());
 
   // Do this after the kpayload so if the user spoofs it doesn't effect checks in the kpayload
   if (config.target_id[0] != '\0') {
