@@ -97,7 +97,7 @@ const struct kpayload_offsets offsets_751 PAYLOAD_RDATA = {
 
   // SceShellCore patches - call nidf_libSceDipsw
   .nidf_libSceDipsw_patch1         = 0x00168ABA,
-  .nidf_libSceDipsw_patch2         = 0x00316BD3,
+  .nidf_libSceDipsw_patch2         = 0x0023CE48,
   .nidf_libSceDipsw_patch3         = 0x007FBF2A,
   .nidf_libSceDipsw_patch4         = 0x009D317A,
 
@@ -111,20 +111,20 @@ const struct kpayload_offsets offsets_751 PAYLOAD_RDATA = {
   .enable_data_mount_patch         = 0x00316BC3,
 
   // SceShellCore patches - enable VR without spoof
-  .enable_psvr_patch               = 0x00D53E4C,
+  .enable_psvr_patch               = 0x00D57E60,
 
   // SceShellCore patches - enable fpkg
   .enable_fpkg_patch               = 0x003C244F,
 
   // SceShellCore patches - use `free` prefix instead `fake`
-  .fake_free_patch                 = 0x00F66831,
+  .fake_free_patch                 = 0x00F66811,
 
   // SceShellCore patches - enable official external HDD support
   .pkg_installer_patch             = 0x009BC141,
   .ext_hdd_patch                   = 0x005BCF2D,
 
   // SceShellCore patches - enable debug trophies
-  .debug_trophies_patch            = 0x006E3C19,
+  .debug_trophies_patch            = 0x006E7D29,
 
   // SceShellCore patches - disable screenshot block
   .disable_screenshot_patch        = 0x000CD6B6,
