@@ -8,9 +8,11 @@
 #include "plugin_bootloader.prx.inc.c"
 #include "plugin_loader.prx.inc.c"
 #include "plugin_server.prx.inc.c"
+#include "plugin_mono.prx.inc.c"
 
 void upload_prx_to_disk(void) {
   write_blob(PRX_BOOTLOADER_PATH, plugin_bootloader_prx, plugin_bootloader_prx_len);
   write_blob(PRX_LOADER_PATH, plugin_loader_prx, plugin_loader_prx_len);
   write_blob(PRX_SERVER_PATH, plugin_server_prx, plugin_server_prx_len);
+  write_blob(PRX_MONO_PATH, plugin_mono_prx, plugin_mono_prx_len);
 }
