@@ -125,7 +125,7 @@ PAYLOAD_CODE void resolve_kdlsym() {
   resolve(strlen);
   resolve(printf);
   resolve(eventhandler_register);
-  eventhandler_register_old = eventhandler_register;
+  eventhandler_register_old = (void *)eventhandler_register;
 
   // Fself
   resolve(sceSblACMgrGetPathId);
