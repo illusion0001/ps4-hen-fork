@@ -47,7 +47,6 @@ struct kpayload_install_payload_args {
   kernel_ptr = (uint8_t *)kernel_base;                                      \
   kernel_pmap_store = &kernel_ptr[K##x##_PMAP_STORE];                       \
   pmap_protect_p_patch = &kernel_ptr[K##x##_PMAP_PROTECT_P];                \
-  payload_buffer = &kernel_ptr[K##x##_DT_HASH_SEGMENT];                     \
   pmap_protect = (void *)(kernel_base + K##x##_PMAP_PROTECT);
 
 #endif
