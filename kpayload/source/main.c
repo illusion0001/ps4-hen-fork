@@ -346,7 +346,7 @@ PAYLOAD_CODE int my_entrypoint(uint16_t fw_version_arg) {
   fw_version = fw_version_arg;
   fw_offsets = get_offsets_for_fw(fw_version);
   if (!fw_offsets) {
-    return -1;
+    return 0x9999;
   }
   resolve_kdlsym();
   printf("Hello from KPayload: %i\n", fw_version);
@@ -357,7 +357,7 @@ PAYLOAD_CODE int my_entrypoint(uint16_t fw_version_arg) {
   resolve_syscall();
   install_syscall_hooks();
 
-  return 0;
+  return fw_offsets->printf_addr;
 }
 
 struct {

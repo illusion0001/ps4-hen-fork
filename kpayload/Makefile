@@ -16,6 +16,7 @@ $(TARGET): $(ODIR) $(OBJS)
 	$(OBJCOPY) -R .payload_bss temp.t temp.u
 	$(OBJCOPY) -O binary temp.u $(TARGET)
 	rm -f temp.t temp.u
+	xxd -i $(TARGET) | sed 's/^unsigned /static const unsigned /' > ../installer/source/kpayload.inc.c
 
 $(ODIR)/%.o: $(SDIR)/%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
