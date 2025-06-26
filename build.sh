@@ -10,6 +10,7 @@ if [ "$(id -u)" -eq 0 ] && grep -qi ubuntu /etc/os-release; then
 fi
 
 cd kpayload
+make clean
 make
 cd ..
 
@@ -42,12 +43,13 @@ fi
 # including as headers doesn't do it
 for file in *.prx; do
   echo $file
-  xxd -i "$file" > "../installer/source/${file}.c"
+  xxd -i "$file" | sed 's/^unsigned /static const unsigned /' > "../installer/source/${file}.inc.c"
 done
 
 cd ..
 
 cd installer
+make clean
 make
 cd ..
 
