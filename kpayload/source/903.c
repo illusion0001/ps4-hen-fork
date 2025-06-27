@@ -111,7 +111,7 @@ const struct kpayload_offsets offsets_903 PAYLOAD_RDATA = {
   .enable_data_mount_patch         = 0x00321F2B,
 
   // SceShellCore patches - enable VR without spoof
-  .enable_psvr_patch               = 0x00D5A4DF,
+  .enable_psvr_patch               = 0x00DB31E0,
 
   // SceShellCore patches - enable fpkg
   .enable_fpkg_patch               = 0x003DA06F,
@@ -124,8 +124,8 @@ const struct kpayload_offsets offsets_903 PAYLOAD_RDATA = {
   .ext_hdd_patch                   = 0x0061A66D,
 
   // SceShellCore patches - enable debug trophies
-  .debug_trophies_patch            = 0x007416C9,
+  .debug_trophies_patch            = 0x00745809,
 
   // SceShellCore patches - disable screenshot block
-  .disable_screenshot_patch        = 0x0038EE26,
+  .disable_screenshot_patch        = 0x000D1956,
 };

@@ -77,7 +77,7 @@ const struct kpayload_offsets offsets_904 PAYLOAD_RDATA = {
   .mountpfs__sceSblPfsSetKeys_hook1                          = 0x006C1EB9,
   .mountpfs__sceSblPfsSetKeys_hook2                          = 0x006C20EA,
 
-  // SceShellUI patches - debug patches - libkernel_sys.sprx - libkernel_sys.sprx
+  // SceShellUI patches - debug patches - libkernel_sys.sprx
   .sceSblRcMgrIsAllowDebugMenuForSettings_patch              = 0x0001D1C0,
   .sceSblRcMgrIsStoreMode_patch                              = 0x0001D520,
 
@@ -111,7 +111,7 @@ const struct kpayload_offsets offsets_904 PAYLOAD_RDATA = {
   .enable_data_mount_patch         = 0x00321F2B,
 
   // SceShellCore patches - enable VR without spoof
-  .enable_psvr_patch               = 0x00D5A4D1,
+  .enable_psvr_patch               = 0x00DB3200,
 
   // SceShellCore patches - enable fpkg
   .enable_fpkg_patch               = 0x003DA06F,
@@ -124,7 +124,7 @@ const struct kpayload_offsets offsets_904 PAYLOAD_RDATA = {
   .ext_hdd_patch                   = 0x0061A69D,
 
   // SceShellCore patches - enable debug trophies
-  .debug_trophies_patch            = 0x00741839,
+  .debug_trophies_patch            = 0x00745839,
 
   // SceShellCore patches - disable screenshot block
   .disable_screenshot_patch        = 0x0038EE26,
