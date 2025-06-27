@@ -6,7 +6,7 @@ const struct kpayload_offsets offsets_950 PAYLOAD_RDATA = {
   // data
   .XFAST_SYSCALL_addr              = 0x000001C0,
   .M_TEMP_addr                     = 0x01A4ECB0,
-  .MINI_SYSCORE_SELF_BINARY_addr   = 0x00D42930,
+  .MINI_SYSCORE_SELF_BINARY_addr   = 0x01542948,
   .ALLPROC_addr                    = 0x0221D2A0,
   .SBL_DRIVER_MAPPED_PAGES_addr    = 0x0263A6D0,
   .SBL_PFS_SX_addr                 = 0x02658650,
@@ -42,7 +42,7 @@ const struct kpayload_offsets offsets_950 PAYLOAD_RDATA = {
   .sceSblAuthMgrVerifyHeader_addr  = 0x0063A9D0,
 
   // Fpkg
-  .RsaesPkcs1v15Dec2048CRT_addr    = 0x002BA420,
+  .RsaesPkcs1v15Dec2048CRT_addr    = 0x0005F060,
   .Sha256Hmac_addr                 = 0x0021B230,
   .AesCbcCfb128Encrypt_addr        = 0x003681A0,
   .AesCbcCfb128Decrypt_addr        = 0x003683D0,
@@ -111,7 +111,7 @@ const struct kpayload_offsets offsets_950 PAYLOAD_RDATA = {
   .enable_data_mount_patch         = 0x0031C2E1,
 
   // SceShellCore patches - enable VR without spoof
-  .enable_psvr_patch               = 0x00D40741,
+  .enable_psvr_patch               = 0x00D982D0,
 
   // SceShellCore patches - enable fpkg
   .enable_fpkg_patch               = 0x003D3B2F,
@@ -124,8 +124,8 @@ const struct kpayload_offsets offsets_950 PAYLOAD_RDATA = {
   .ext_hdd_patch                   = 0x0060F71D,
 
   // SceShellCore patches - enable debug trophies
-  .debug_trophies_patch            = 0x0073C7D9,
+  .debug_trophies_patch            = 0x00740949,
 
   // SceShellCore patches - disable screenshot block
-  .disable_screenshot_patch        = 0x0038ACF6,
+  .disable_screenshot_patch        = 0x000CF686,
 };
