@@ -25,21 +25,28 @@
 - Remote Play Enabler
 - Disable ASLR
 
-## Usage
+## Building
 
-On your computer, clone the repository:
+Instructions provided are for Debian based systems. (Tested on Ubuntu)
 
-```sh
-git clone --recursive https://github.com/EchoStretch/ps4-hen-vtx.git
-```
-
-Compile the payloads:
+Install [ps4-payload-sdk](https://github.com/Scene-Collective/ps4-payload-sdk):
 
 ```sh
-./build.sh 900
+git clone https://github.com/Scene-Collective/ps4-payload-sdk.git
+sudo ./install.sh
 ```
 
-For other firmwares, e.g. FW 12.02, `./build.sh 1202`.
+Clone the repository:
+
+```sh
+git clone https://github.com/Scene-Collective/ps4-hen.git
+```
+
+Compile the payload:
+
+```sh
+./build.sh
+```
 
 ## Contributors
 Massive credits to the following:
