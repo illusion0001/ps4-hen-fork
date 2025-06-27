@@ -56,6 +56,7 @@ Massive credits to the following:
 - [Biorn1950](https://github.com/Biorn1950)
 - [Al-Azif](https://github.com/Al-Azif)
 - Anonymous
+- illusiony
 
 ## Helped With Porting
 Massive Thanks to the following:
@@ -63,4 +64,3 @@ Massive Thanks to the following:
 - [LM](https://twitter.com/LightningMods)
 - [Al-Azif](https://twitter.com/_AlAzif)
 - [zecoxao](https://twitter.com/notnotzecoxao)
-- [illusion0001](https://twitter.com/illusion0002)
