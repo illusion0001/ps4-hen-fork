@@ -9,8 +9,12 @@
 
 #include <ps4.h>
 
-extern char kpayload[];
-extern unsigned kpayload_size;
+// will force rebuild because its translation unit to be built first
+// static won't redefine these symbols here
+#include "plugin_bootloader.prx.inc.c"
+#include "plugin_loader.prx.inc.c"
+#include "plugin_server.prx.inc.c"
+#include "kpayload.inc.c"
 
 #define DEFAULT_DISABLE_ASLR 1 // Disable ASLR by default
 #define DEFAULT_NOBD_PATCHES 0 // Skip NoBD patches by default
@@ -386,8 +390,8 @@ int install_patches() {
 int install_payload() {
   struct kpayload_payload_info kpayload_payload_info;
   kpayload_payload_info.fw_version = get_firmware();
-  kpayload_payload_info.buffer = (uint8_t *)kpayload;
-  kpayload_payload_info.size = (size_t)kpayload_size;
+  kpayload_payload_info.buffer = (uint8_t *)kpayload_bin;
+  kpayload_payload_info.size = (size_t)kpayload_bin_len;
 
   return kexec(&kpayload_install_payload, &kpayload_payload_info);
 }
@@ -478,16 +482,6 @@ static void write_blob(const char* path, const void* blob, const size_t blobsz) 
     printf_notification("Failed to write %s!\nFile descriptor %d", path, fd);
   }
 }
-
-#define bl(n) \
-    extern unsigned char* n;     \
-    extern unsigned int n##_len
-
-bl(plugin_bootloader_prx);
-bl(plugin_loader_prx);
-bl(plugin_server_prx);
-
-#undef bl
 
 static void upload_prx_to_disk(void) {
   write_blob("/user/data/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
