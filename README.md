@@ -25,21 +25,19 @@
 - Remote Play Enabler
 - Disable ASLR
 
-## Usage
+## Building
 
 On your computer, clone the repository:
 
 ```sh
-git clone --recursive https://github.com/EchoStretch/ps4-hen-vtx.git
+git clone https://github.com/Scene-Collective/ps4-hen.git
 ```
 
-Compile the payloads:
+Compile the payload:
 
 ```sh
-./build.sh 900
+./build.sh
 ```
-
-For other firmwares, e.g. FW 12.02, `./build.sh 1202`.
 
 ## Contributors
 Massive credits to the following:
