@@ -27,7 +27,14 @@
 
 ## Building
 
-On your computer, clone the repository:
+Install [ps4-payload-sdk](https://github.com/Scene-Collective/ps4-payload-sdk):
+
+```
+git clone https://github.com/Scene-Collective/ps4-payload-sdk.git
+sudo ./install.sh
+```
+
+Clone the repository:
 
 ```sh
 git clone https://github.com/Scene-Collective/ps4-hen.git
