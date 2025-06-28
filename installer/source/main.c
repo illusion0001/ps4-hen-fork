@@ -532,6 +532,11 @@ int _main(struct thread *td) {
   install_patches();
   mmap_patch();
 
+  // Create HEN directory, if it doesn't already exist
+  if(!dir_exists(BASE_PATH)) {
+    mkdir(BASE_PATH, 0777);
+  }
+
   // Get config, if it exists
   int config_loaded = 0;
   configuration config;
