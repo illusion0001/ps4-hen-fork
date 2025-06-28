@@ -1,7 +1,7 @@
 /.vscode/
 
 /installer/build/
-**/**.inc.c
+/installer/source/*.inc.c
 /installer/*.bin
 /installer/*.map
 
@@ -13,4 +13,4 @@
 
 /tmp/
 
-/hen.bin
+/*.bin

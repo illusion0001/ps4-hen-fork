@@ -86,7 +86,7 @@ const struct kpayload_offsets offsets_803 PAYLOAD_RDATA = {
   .remote_play_menu_patch                                    = 0x00EDB6B1, // system_ex\app\NPXS20001\psm\Application\app.exe.sprx
 
   // SceRemotePlay patches - remote play patches - system\vsh\app\NPXS21006
-  .SceRemotePlay_patch1                                      = 0x0010C4C8,
+  .SceRemotePlay_patch1                                      = 0x0010C4CB,
   .SceRemotePlay_patch2                                      = 0x0010C4E6,
 
   // SceShellCore patches - call sceKernelIsGenuineCEX
@@ -111,7 +111,7 @@ const struct kpayload_offsets offsets_803 PAYLOAD_RDATA = {
   .enable_data_mount_patch         = 0x0031C503,
 
   // SceShellCore patches - enable VR without spoof
-  .enable_psvr_patch               = 0x00D4F52F,
+  .enable_psvr_patch               = 0x00DA7540,
 
   // SceShellCore patches - enable fpkg
   .enable_fpkg_patch               = 0x003D1A2F,
@@ -124,8 +124,8 @@ const struct kpayload_offsets offsets_803 PAYLOAD_RDATA = {
   .ext_hdd_patch                   = 0x0060761D,
 
   // SceShellCore patches - enable debug trophies
-  .debug_trophies_patch            = 0x00729659,
+  .debug_trophies_patch            = 0x0072D669,
 
   // SceShellCore patches - disable screenshot block
-  .disable_screenshot_patch        = 0x003862F6,
+  .disable_screenshot_patch        = 0x000CF3F6,
 };

@@ -1,8 +1,8 @@
 #include "sections.h"
 
-#include "offsets/801.h"
+#include "offsets/800.h"
 
-const struct kpayload_offsets offsets_801 PAYLOAD_RDATA = {
+const struct kpayload_offsets offsets_800 PAYLOAD_RDATA = {
   // data
   .XFAST_SYSCALL_addr              = 0x000001C0,
   .M_TEMP_addr                     = 0x01A77E10,
@@ -83,10 +83,10 @@ const struct kpayload_offsets offsets_801 PAYLOAD_RDATA = {
 
   // SceShellUI patches - remote play patches
   .CreateUserForIDU_patch                                    = 0x00187300, // system_ex\app\NPXS20001\eboot.bin
-  .remote_play_menu_patch                                    = 0x00EDB1B1, // system_ex\app\NPXS20001\psm\Application\app.exe.sprx
+  .remote_play_menu_patch                                    = 0x00EDB201, // system_ex\app\NPXS20001\psm\Application\app.exe.sprx
 
   // SceRemotePlay patches - remote play patches - system\vsh\app\NPXS21006
-  .SceRemotePlay_patch1                                      = 0x0010C4C8,
+  .SceRemotePlay_patch1                                      = 0x0010C4CB,
   .SceRemotePlay_patch2                                      = 0x0010C4E6,
 
   // SceShellCore patches - call sceKernelIsGenuineCEX
@@ -124,8 +124,8 @@ const struct kpayload_offsets offsets_801 PAYLOAD_RDATA = {
   .ext_hdd_patch                   = 0x0060756D,
 
   // SceShellCore patches - enable debug trophies
-  .debug_trophies_patch            = 0x007295A6,
+  .debug_trophies_patch            = 0x0072D5B9,
 
   // SceShellCore patches - disable screenshot block
-  .disable_screenshot_patch        = 0x003862F6,
+  .disable_screenshot_patch        = 0x000CF3F6,
 };
