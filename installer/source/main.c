@@ -4,6 +4,7 @@
 
 #define VERSION "2.2.0 BETA"
 
+#include "path.h"
 #include "defines.h"
 #include "offsets.h"
 
@@ -460,7 +461,7 @@ int set_target_id(char *tid) {
     snprintf(buffer, buffer_size, "Kratos");
     break;
   default:
-    printf_notification("Spoofing: UNKNOWN...\nCheck your `hen.ini` file");
+    printf_notification("Spoofing: UNKNOWN...\nCheck your `" HEN_INI "` file");
     return -1;
   }
 
@@ -485,9 +486,9 @@ static void write_blob(const char* path, const void* blob, const size_t blobsz) 
 }
 
 static void upload_prx_to_disk(void) {
-  write_blob("/user/data/hen/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
-  write_blob("/user/data/hen/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
-  write_blob("/user/data/hen/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
+  write_blob("/user/" BASE_PATH "/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
+  write_blob("/user/" BASE_PATH "/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
+  write_blob("/user/" BASE_PATH "/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
 }
 
 static void kill_proc(const char* proc) {
@@ -505,7 +506,7 @@ static void kill_proc(const char* proc) {
 
 
 static void upload_ver(void) {
-  write_blob("/user/data/hen/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
+  write_blob("/user/" BASE_PATH "/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
 }
 
 int _main(struct thread *td) {
@@ -537,23 +538,23 @@ int _main(struct thread *td) {
   memset(&config, '\0', sizeof(config));
   config.disable_aslr = DEFAULT_DISABLE_ASLR;
   config.nobd_patches = DEFAULT_NOBD_PATCHES;
-  if (file_exists("/mnt/usb0/hen.ini")) {
-    if (cfg_parse("/mnt/usb0/hen.ini", config_handler, &config) < 0) {
-      printf_notification("ERROR: Unable to load `/mnt/usb0/hen.ini`");
+  if (file_exists(USB_INI_PATH)) {
+    if (cfg_parse(USB_INI_PATH, config_handler, &config) < 0) {
+      printf_notification("ERROR: Unable to load `" USB_INI_PATH "`");
       // Restore defaults in case one of them changed for some reason...
       memset(&config, '\0', sizeof(config));
       config.disable_aslr = DEFAULT_DISABLE_ASLR;
       config.nobd_patches = DEFAULT_NOBD_PATCHES;
     } else {
-      if (!file_compare("/mnt/usb0/hen/hen.ini", "/data/hen/hen.ini")) {
-        unlink("/data/hen/hen.ini");
-        copy_file("/mnt/usb0/hen/hen.ini", "/data/hen/hen.ini");
+      if (!file_compare(USB_INI_PATH, HDD_INI_PATH)) {
+        unlink(HDD_INI_PATH);
+        copy_file(USB_INI_PATH, HDD_INI_PATH);
       }
       config_loaded = 1;
     }
-  } else if (file_exists("/data/hen/hen.ini")) {
-    if (cfg_parse("/data/hen/hen.ini", config_handler, &config) < 0) {
-      printf_notification("ERROR: Unable to load `/data/hen/hen.ini`");
+  } else if (file_exists(HDD_INI_PATH)) {
+    if (cfg_parse(HDD_INI_PATH, config_handler, &config) < 0) {
+      printf_notification("ERROR: Unable to load `" HDD_INI_PATH "`");
       // Restore defaults in case one of them changed for some reason...
       memset(&config, '\0', sizeof(config));
       config.disable_aslr = DEFAULT_DISABLE_ASLR;

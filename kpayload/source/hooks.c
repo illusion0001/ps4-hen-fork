@@ -15,6 +15,8 @@
 
 #include "hooks.h"
 
+#include "../../installer/include/path.h"
+
 extern char *(*strstr)(const char *haystack, const char *needle)PAYLOAD_BSS;
 extern void *(*memcpy)(void *dst, const void *src, size_t len) PAYLOAD_BSS;
 extern void *(*memset)(void *s, int c, size_t n) PAYLOAD_BSS;
@@ -272,7 +274,7 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     const int handle_out = args->handle_out ? *args->handle_out : 0;
     struct dynlib_load_prx_args my_args = {};
     int handle = 0;
-    my_args.prx_path = "/data/hen/plugin_bootloader.prx";
+    my_args.prx_path = BASE_PATH "/plugin_bootloader.prx";
     my_args.handle_out = &handle;
     sys_dynlib_load_prx(td, &my_args);
     uintptr_t init_env_ptr = 0;
@@ -287,8 +289,7 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     // dummy process to load server prx into
     struct dynlib_load_prx_args my_args = {};
     int handle = 0;
-    // TODO: Upload this file to disk
-    my_args.prx_path = "/data/hen/plugin_server.prx";
+    my_args.prx_path = BASE_PATH "/plugin_server.prx";
     my_args.handle_out = &handle;
     sys_dynlib_load_prx(td, &my_args);
     uintptr_t init_env_ptr = 0;
