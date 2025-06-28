@@ -489,16 +489,18 @@ static void upload_prx_to_disk(void) {
   write_blob("/user/data/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
 }
 
-static void kill_party(void) {
-  // this was choosen because SceShellCore will try to restart this daemon if it crashes
-  // or manually killed in this case
-  static char proc[] = "ScePartyDaemon";
+static void kill_proc(const char* proc) {
   const int party = findProcess(proc);
   printf_debug("%s %d\n", proc, party);
   if (party > 0) {
     const int k = kill(party, SIGKILL);
     printf_debug("sent SIGKILL(%d) to %s(%d)\n", k, proc, party);
   }
+}
+
+
+static void upload_ver(void) {
+  write_blob("/user/data/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
 }
 
 int _main(struct thread *td) {
@@ -579,14 +581,30 @@ int _main(struct thread *td) {
 
   // TODO: Option to enable/disable
   upload_prx_to_disk();
-  kill_party();
+
+  // this was choosen because SceShellCore will try to restart this daemon if it crashes
+  // or manually killed in this case
+  kill_proc("ScePartyDaemon");
 
   printf_notification("Welcome to HEN %s", VERSION);
-
+  // for future use
+  const bool kill_ui = false;
+  const int sleep_sec = 3;
+  if (kill_ui)
+  {
+    sleep(sleep_sec);
+    static const char ui[] = "SceShellUI";
+    printf_notification("HEN is restarting %s in %d seconds...", ui, sleep_sec);
+  }
 #ifdef DEBUG_SOCKET
   printf_debug("Closing socket...\n");
   SckClose(DEBUG_SOCK);
 #endif
+  if (kill_ui)
+  {
+    sleep(sleep_sec);
+    kill_proc(ui);
+  }
 
   return 0;
 }
