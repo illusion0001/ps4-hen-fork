@@ -486,9 +486,9 @@ static void write_blob(const char* path, const void* blob, const size_t blobsz) 
 }
 
 static void upload_prx_to_disk(void) {
-  write_blob("/user/" BASE_PATH "/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
-  write_blob("/user/" BASE_PATH "/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
-  write_blob("/user/" BASE_PATH "/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
+  write_blob(BASE_PATH "/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
+  write_blob(BASE_PATH "/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
+  write_blob(BASE_PATH "/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
 }
 
 static void kill_proc(const char* proc) {
@@ -506,7 +506,7 @@ static void kill_proc(const char* proc) {
 
 
 static void upload_ver(void) {
-  write_blob("/user/" BASE_PATH "/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
+  write_blob(BASE_PATH "/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
 }
 
 int _main(struct thread *td) {
