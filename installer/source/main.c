@@ -591,9 +591,10 @@ int _main(struct thread *td) {
   // for future use
   const bool kill_ui = false;
   const int sleep_sec = 3;
+  const int u_to_sec = 1000 * 1000;
+  static const char ui[] = "SceShellUI";
   if (kill_ui) {
-    sleep(sleep_sec);
-    static const char ui[] = "SceShellUI";
+    usleep(sleep_sec*u_to_sec);
     printf_notification("HEN will restarting %s in %d seconds...", ui, sleep_sec);
   }
 #ifdef DEBUG_SOCKET
@@ -601,7 +602,7 @@ int _main(struct thread *td) {
   SckClose(DEBUG_SOCK);
 #endif
   if (kill_ui) {
-    sleep(sleep_sec);
+    usleep(sleep_sec*u_to_sec);
     kill_proc(ui);
   }
 
