@@ -7,6 +7,7 @@
 #include "defines.h"
 #include "offsets.h"
 
+#include <stdbool.h>
 #include <ps4.h>
 
 // will force rebuild because its translation unit to be built first
@@ -590,18 +591,16 @@ int _main(struct thread *td) {
   // for future use
   const bool kill_ui = false;
   const int sleep_sec = 3;
-  if (kill_ui)
-  {
+  if (kill_ui) {
     sleep(sleep_sec);
     static const char ui[] = "SceShellUI";
-    printf_notification("HEN is restarting %s in %d seconds...", ui, sleep_sec);
+    printf_notification("HEN will restarting %s in %d seconds...", ui, sleep_sec);
   }
 #ifdef DEBUG_SOCKET
   printf_debug("Closing socket...\n");
   SckClose(DEBUG_SOCK);
 #endif
-  if (kill_ui)
-  {
+  if (kill_ui) {
     sleep(sleep_sec);
     kill_proc(ui);
   }
