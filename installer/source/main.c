@@ -485,9 +485,9 @@ static void write_blob(const char* path, const void* blob, const size_t blobsz) 
 }
 
 static void upload_prx_to_disk(void) {
-  write_blob("/user/data/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
-  write_blob("/user/data/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
-  write_blob("/user/data/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
+  write_blob("/user/data/hen/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
+  write_blob("/user/data/hen/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
+  write_blob("/user/data/hen/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
 }
 
 static void kill_proc(const char* proc) {
@@ -505,7 +505,7 @@ static void kill_proc(const char* proc) {
 
 
 static void upload_ver(void) {
-  write_blob("/user/data/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
+  write_blob("/user/data/hen/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
 }
 
 int _main(struct thread *td) {
@@ -545,15 +545,15 @@ int _main(struct thread *td) {
       config.disable_aslr = DEFAULT_DISABLE_ASLR;
       config.nobd_patches = DEFAULT_NOBD_PATCHES;
     } else {
-      if (!file_compare("/mnt/usb0/hen.ini", "/data/hen.ini")) {
-        unlink("/data/hen.ini");
-        copy_file("/mnt/usb0/hen.ini", "/data/hen.ini");
+      if (!file_compare("/mnt/usb0/hen/hen.ini", "/data/hen/hen.ini")) {
+        unlink("/data/hen/hen.ini");
+        copy_file("/mnt/usb0/hen/hen.ini", "/data/hen/hen.ini");
       }
       config_loaded = 1;
     }
-  } else if (file_exists("/data/hen.ini")) {
-    if (cfg_parse("/data/hen.ini", config_handler, &config) < 0) {
-      printf_notification("ERROR: Unable to load `/data/hen.ini`");
+  } else if (file_exists("/data/hen/hen.ini")) {
+    if (cfg_parse("/data/hen/hen.ini", config_handler, &config) < 0) {
+      printf_notification("ERROR: Unable to load `/data/hen/hen.ini`");
       // Restore defaults in case one of them changed for some reason...
       memset(&config, '\0', sizeof(config));
       config.disable_aslr = DEFAULT_DISABLE_ASLR;

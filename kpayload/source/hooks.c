@@ -272,7 +272,7 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     const int handle_out = args->handle_out ? *args->handle_out : 0;
     struct dynlib_load_prx_args my_args = {};
     int handle = 0;
-    my_args.prx_path = "/data/plugin_bootloader.prx";
+    my_args.prx_path = "/data/hen/plugin_bootloader.prx";
     my_args.handle_out = &handle;
     sys_dynlib_load_prx(td, &my_args);
     uintptr_t init_env_ptr = 0;
@@ -288,7 +288,7 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
     struct dynlib_load_prx_args my_args = {};
     int handle = 0;
     // TODO: Upload this file to disk
-    my_args.prx_path = "/data/plugin_server.prx";
+    my_args.prx_path = "/data/hen/plugin_server.prx";
     my_args.handle_out = &handle;
     sys_dynlib_load_prx(td, &my_args);
     uintptr_t init_env_ptr = 0;
