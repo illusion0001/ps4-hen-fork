@@ -595,7 +595,7 @@ int _main(struct thread *td) {
   static const char ui[] = "SceShellUI";
   if (kill_ui) {
     usleep(sleep_sec*u_to_sec);
-    printf_notification("HEN will restarting %s in %d seconds...", ui, sleep_sec);
+    printf_notification("HEN will restart %s in %d seconds...", ui, sleep_sec);
   }
 #ifdef DEBUG_SOCKET
   printf_debug("Closing socket...\n");
