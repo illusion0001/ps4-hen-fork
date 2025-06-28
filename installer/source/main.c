@@ -7,6 +7,7 @@
 #include "defines.h"
 #include "offsets.h"
 
+#include <stdbool.h>
 #include <ps4.h>
 
 // will force rebuild because its translation unit to be built first
@@ -489,16 +490,22 @@ static void upload_prx_to_disk(void) {
   write_blob("/user/data/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
 }
 
-static void kill_party(void) {
-  // this was choosen because SceShellCore will try to restart this daemon if it crashes
-  // or manually killed in this case
-  static char proc[] = "ScePartyDaemon";
+static void kill_proc(const char* proc) {
+  if (!proc)
+  {
+    return;
+  }
   const int party = findProcess(proc);
   printf_debug("%s %d\n", proc, party);
   if (party > 0) {
     const int k = kill(party, SIGKILL);
     printf_debug("sent SIGKILL(%d) to %s(%d)\n", k, proc, party);
   }
+}
+
+
+static void upload_ver(void) {
+  write_blob("/user/data/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
 }
 
 int _main(struct thread *td) {
@@ -577,16 +584,32 @@ int _main(struct thread *td) {
     set_target_id(config.target_id);
   }
 
+  upload_ver();
   // TODO: Option to enable/disable
   upload_prx_to_disk();
-  kill_party();
 
   printf_notification("Welcome to HEN %s", VERSION);
-
+  // for future use
+  const bool kill_ui = false;
+  const int sleep_sec = kill_ui ? 4 : 1;
+  const int u_to_sec = 1000 * 1000;
+  const char* proc = kill_ui ? "SceShellUI" : 0;
+  if (kill_ui) {
+    usleep(sleep_sec * u_to_sec);
+    printf_notification("HEN will restart %s\n"
+                        "in %d seconds...",
+                        proc, sleep_sec);
+  }
 #ifdef DEBUG_SOCKET
   printf_debug("Closing socket...\n");
   SckClose(DEBUG_SOCK);
 #endif
+
+  usleep(sleep_sec * u_to_sec);
+  // this was choosen because SceShellCore will try to restart this daemon if it crashes
+  // or manually killed in this case
+  kill_proc("ScePartyDaemon");
+  kill_proc(proc);
 
   return 0;
 }
