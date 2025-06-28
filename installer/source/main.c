@@ -486,9 +486,9 @@ static void write_blob(const char* path, const void* blob, const size_t blobsz) 
 }
 
 static void upload_prx_to_disk(void) {
-  write_blob(BASE_PATH "/plugin_bootloader.prx", plugin_bootloader_prx, plugin_bootloader_prx_len);
-  write_blob(BASE_PATH "/plugin_loader.prx", plugin_loader_prx, plugin_loader_prx_len);
-  write_blob(BASE_PATH "/plugin_server.prx", plugin_server_prx, plugin_server_prx_len);
+  write_blob(PRX_BOOTLOADER_PATH, plugin_bootloader_prx, plugin_bootloader_prx_len);
+  write_blob(PRX_LOADER_PATH, plugin_loader_prx, plugin_loader_prx_len);
+  write_blob(PRX_SERVER_PATH, plugin_server_prx, plugin_server_prx_len);
 }
 
 static void kill_proc(const char* proc) {
