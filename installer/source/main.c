@@ -506,7 +506,7 @@ static void kill_proc(const char* proc) {
 
 
 static void upload_ver(void) {
-  write_blob(BASE_PATH "/ps4hen_version.txt", VERSION, sizeof(VERSION) - 1);
+  write_blob(BASE_PATH "/" VERSION_TXT, VERSION, sizeof(VERSION) - 1);
 }
 
 int _main(struct thread *td) {
