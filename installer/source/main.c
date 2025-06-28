@@ -587,7 +587,6 @@ int _main(struct thread *td) {
     printf_notification("NoBD patches enabled");
   }
 
-  // SceShellUI
   // Install and run kpayload
   install_payload();
 
@@ -601,6 +600,7 @@ int _main(struct thread *td) {
   // this was choosen because SceShellCore will try to restart this daemon if it crashes
   // or manually killed in this case
   kill_proc("ScePartyDaemon");
+  kill_proc("SceShellUI");
   printf_notification("Welcome to HEN %s", VERSION);
 
 #ifdef DEBUG_SOCKET

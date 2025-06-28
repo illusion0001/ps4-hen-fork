@@ -284,10 +284,10 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
       proc_rw_mem(td->td_proc, (void *)init_env_ptr, sizeof(jmp), jmp, 0, 1);
       proc_rw_mem(td->td_proc, (void *)(init_env_ptr + sizeof(jmp)), sizeof(plugin_load_ptr), &plugin_load_ptr, 0, 1);
     }
+    printf("%s init env 0x%lx plugin load 0x%lx\n", titleid, init_env_ptr, plugin_load_ptr);
   }
   const bool isPartyDaemon = strstr(td->td_name, "ScePartyDaemonMain") != NULL;
   const bool isShellUI = strstr(td->td_name, "SceShellUIMain") != NULL;
-  printf("%d %d\n", isPartyDaemon, isShellUI);
   if (strstr(p, "/common/lib/libSceSysmodule.sprx") && (isPartyDaemon || isShellUI))
   {
     // dummy process to load server prx into
