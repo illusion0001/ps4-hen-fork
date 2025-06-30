@@ -129,6 +129,10 @@ const struct kpayload_offsets offsets_950 PAYLOAD_RDATA = {
 
   // SceShellCore patches - disable screenshot block
   .disable_screenshot_patch        = 0x000CF686,
+
+  // Process structure offsets
+  .proc_p_comm_offset = 0x454,
+  .proc_path_offset   = 0x474,
 };
 
 // clang-format on
