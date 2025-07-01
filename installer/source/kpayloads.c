@@ -387,8 +387,61 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
 
   // patch sys_dynlib_dlsym() to allow dynamic symbol resolution everywhere
   if (fw_version >= 505 && fw_version <= 507) {
-    // Cryptogenic/PS4-5.05-Kernel-Exploit: ????
-    // ChendoChap/ps4-ipv6-uaf:             ????
+    // ChendoChap's patches from pOOBs4
+    kmem = (uint8_t *)&kernel_ptr[0x00000ABD]; // bcopy
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x001EA47D]; // bzero
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x001EA4C1]; // pagezero
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x001EA53D]; // memcpy
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x001EA581]; // pagecopy
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x001EA71D]; // copyin
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x001EAB4D]; // copyinstr
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x001EAC0D]; // copystr
+    kmem[0] = 0xEB;
+
+    // patch amd64_syscall() to allow calling syscalls everywhere
+    kmem = (uint8_t *)&kernel_ptr[0x00000493];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004C5];
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004BC];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B8];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    // patch sys_setuid() to allow freely changing the effective user ID
+    kmem = (uint8_t *)&kernel_ptr[0x0054A7D];
+    kmem[0] = 0xEB;
+
+    // patch vm_map_protect() (called by sys_mprotect()) to allow rwx mappings
+    kmem = (uint8_t *)&kernel_ptr[0x01A3C0A];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    // patch sys_dynlib_dlsym() to allow dynamic symbol resolution everywhere
     kmem = (uint8_t *)&kernel_ptr[0x00237F3A];
     kmem[0] = 0x90;
     kmem[1] = 0xE9;
@@ -396,6 +449,19 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[3] = 0x01;
     kmem[4] = 0x00;
     kmem[5] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x02B2620];
+    kmem[0] = 0x48;
+    kmem[1] = 0x31;
+    kmem[2] = 0xC0;
+    kmem[3] = 0xC3;
+
+    // patch sys_mmap() to allow rwx mappings
+    kmem = (uint8_t *)&kernel_ptr[0x013D620];
+    kmem[0] = 0x37;
+
+    kmem = (uint8_t *)&kernel_ptr[0x013D623];
+    kmem[0] = 0x37;
   } else if (fw_version == 672) {
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x0063C8CE]; // veriPatch
