@@ -8,7 +8,6 @@
 #include "sparse.h"
 
 extern uint16_t fw_version PAYLOAD_BSS;
-extern const struct kpayload_offsets *fw_offsets PAYLOAD_BSS;
 
 extern int (*proc_rwmem)(struct proc *p, struct uio *uio) PAYLOAD_BSS;
 extern struct vmspace *(*vmspace_acquire_ref)(struct proc *p)PAYLOAD_BSS;
@@ -48,7 +47,8 @@ PAYLOAD_CODE static struct proc *proc_find_by_name(const char *name) {
   p = *ALLPROC;
 
   do {
-    if (!memcmp(p->p_comm, name, strlen(name))) {
+    char *p_comm = proc_get_p_comm(p);
+    if (p_comm && strlen(p_comm) == strlen(name) && !memcmp(p_comm, name, strlen(name))) {
       return p;
     }
   } while ((p = p->p_forw));

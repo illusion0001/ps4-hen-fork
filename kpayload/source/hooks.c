@@ -63,7 +63,8 @@ PAYLOAD_CODE int sys_proc_list(struct thread *td, struct sys_proc_list_args *uap
     num = *uap->num;
     p = *ALLPROC;
     for (int i = 0; i < num; i++) {
-      memcpy(uap->procs[i].p_comm, p->p_comm, sizeof(uap->procs[i].p_comm));
+      char *p_comm = proc_get_p_comm(p);
+      memcpy(uap->procs[i].p_comm, p_comm, sizeof(uap->procs[i].p_comm));
       uap->procs[i].pid = p->pid;
 
       if (!(p = p->p_forw)) {
@@ -160,8 +161,10 @@ PAYLOAD_CODE void *get_syscall(uint64_t n) {
 
 int sys_proc_info_handle(struct proc *p, struct sys_proc_info_args *args) {
   args->pid = p->pid;
-  memcpy(args->name, p->p_comm, sizeof(args->name));
-  memcpy(args->path, p->path, sizeof(args->path));
+  char *p_comm = proc_get_p_comm(p);
+  memcpy(args->name, p_comm, sizeof(args->name));
+  char *path = proc_get_path(p);
+  memcpy(args->path, path, sizeof(args->path));
   memcpy(args->titleid, p->titleid, sizeof(args->titleid));
   memcpy(args->contentid, p->contentid, sizeof(args->contentid));
   return 0;

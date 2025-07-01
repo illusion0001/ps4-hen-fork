@@ -12,8 +12,6 @@
 
 #define PAGE_SIZE 0x4000
 
-extern const struct kpayload_offsets *fw_offsets PAYLOAD_BSS;
-
 extern void *(*malloc)(unsigned long size, void *type, int flags)PAYLOAD_BSS;
 extern void (*free)(void *addr, void *type) PAYLOAD_BSS;
 extern char *(*strstr)(const char *haystack, const char *needle)PAYLOAD_BSS;

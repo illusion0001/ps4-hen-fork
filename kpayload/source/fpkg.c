@@ -11,8 +11,6 @@
 #include "sections.h"
 #include "sparse.h"
 
-extern const struct kpayload_offsets *fw_offsets PAYLOAD_BSS;
-
 extern int (*_sx_xlock)(struct sx *sx, int opts, const char *file, int line) PAYLOAD_BSS;
 extern int (*_sx_xunlock)(struct sx *sx) PAYLOAD_BSS;
 extern int (*fpu_kern_enter)(struct thread *td, struct fpu_kern_ctx *ctx, uint32_t flags) PAYLOAD_BSS;
@@ -379,7 +377,7 @@ PAYLOAD_CODE int my_sceSblKeymgrSmCallfunc_npdrm_decrypt_rif_new(union keymgr_pa
       goto err;
     }
 
-    // XXX: Sorry, I'm lazy to refactor this crappy code :D basically, we're copying decrypted data to proper place,
+    // TODO: Sorry, I'm lazy to refactor this crappy code :D basically, we're copying decrypted data to proper place,
     // consult with kernel code if offsets needs to be changed
     memcpy(response->decrypt_entire_rif.raw, request->decrypt_entire_rif.rif.digest, sizeof(request->decrypt_entire_rif.rif.digest) + sizeof(request->decrypt_entire_rif.rif.data));
     memset(response->decrypt_entire_rif.raw + sizeof(request->decrypt_entire_rif.rif.digest) + sizeof(request->decrypt_entire_rif.rif.data), '\0', sizeof(response->decrypt_entire_rif.raw) - (sizeof(request->decrypt_entire_rif.rif.digest) + sizeof(request->decrypt_entire_rif.rif.data)));
@@ -451,7 +449,7 @@ PAYLOAD_CODE static int my_sceSblKeymgrInvalidateKey__sx_xlock(struct sx *sx, in
   }
 
 done:
-  // XXX: no need to call SX unlock because we'll jump to original code which expects SX is already locked
+  // no need to call SX unlock because we'll jump to original code which expects SX is already locked
   return ret;
 }
 

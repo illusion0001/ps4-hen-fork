@@ -148,16 +148,26 @@ TYPE_FIELD(struct ucred *p_ucred, 0x40);
 TYPE_FIELD(struct filedesc *p_fd, 0x48);
 TYPE_FIELD(int pid, 0xB0);
 TYPE_FIELD(struct vmspace *p_vmspace, 0x168);
-// TODO: Varies per FW
-// TYPE_FIELD(char p_comm[32], 0x3E8); // 4.00-4.50
-// TYPE_FIELD(char p_comm[32], 0x43C); // 4.55-4.74
-// TYPE_FIELD(char p_comm[32], 0x44C); // 5.00-5.07
-TYPE_FIELD(char p_comm[32], 0x454); // 5.50-5.56 and >= 6.50 (Has it changed since 6.50?)
-// TYPE_FIELD(char p_comm[32], 0x450); // 6.00-6.20
 TYPE_FIELD(char titleid[16], 0x390);
 TYPE_FIELD(char contentid[64], 0x3D4);
-TYPE_FIELD(char path[64], 0x474);
-
+// Varies per FW
+// TYPE_FIELD(char p_comm[32], 0x350); // <3.55
+// TYPE_FIELD(char p_comm[32], 0x3E0); // 3.55-3.70
+// TYPE_FIELD(char p_comm[32], 0x3F0); // 4.00-4.50
+// TYPE_FIELD(char p_comm[32], 0x444); // 4.55-4.74
+// TYPE_FIELD(char p_comm[32], 0x44C); // 5.00-5.07
+// TYPE_FIELD(char p_comm[32], 0x454); // 5.50-5.56
+// TYPE_FIELD(char p_comm[32], 0x450); // 6.00-6.20
+// TYPE_FIELD(char p_comm[32], 0x454); // 6.50+ (TODO: Confirm it hasn't changed since 6.50)
+// Varies per FW
+// TYPE_FIELD(char path[64], 0x370); // <3.55
+// TYPE_FIELD(char path[64], 0x400); // 3.55-3.70
+// TYPE_FIELD(char path[64], 0x410); // 4.00-4.50
+// TYPE_FIELD(char path[64], 0x464); // 4.55-4.74
+// TYPE_FIELD(char path[64], 0x46C); // 5.00-5.07
+// TYPE_FIELD(char path[64], 0x474); // 5.50-5.56
+// TYPE_FIELD(char path[64], 0x470); // 6.00-6.20
+// TYPE_FIELD(char path[64], 0x474); // 6.50+ (TODO: Confirm it hasn't changed since 6.50)
 TYPE_END();
 
 #endif

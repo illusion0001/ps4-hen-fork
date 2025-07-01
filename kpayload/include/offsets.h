@@ -1,9 +1,13 @@
 #ifndef OFFSETS_H_
 #define OFFSETS_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "sections.h"
+
+// Forward declaration for fw_offsets
+extern const struct kpayload_offsets *fw_offsets PAYLOAD_BSS;
 
 // clang-format off
 
@@ -132,11 +136,34 @@ struct kpayload_offsets {
 
   // SceShellCore patches - disable screenshot block
   uint32_t disable_screenshot_patch;
+
+  // Process structure offsets
+  uint32_t proc_p_comm_offset;
+  uint32_t proc_path_offset;
 };
 
-// Lookup function: implemented elsewhere
+// clang-format on
+
+// Offsets initializer function
 PAYLOAD_CODE const struct kpayload_offsets *get_offsets_for_fw(uint16_t fw_version);
 
-// clang-format on
+// Forward declaration for proc structure
+struct proc;
+
+// Get pointer to p_comm field (process name)
+PAYLOAD_CODE static inline char *proc_get_p_comm(struct proc *p) {
+  if (!fw_offsets) {
+    return NULL;
+  }
+  return (char *)((uintptr_t)p + fw_offsets->proc_p_comm_offset);
+}
+
+// Get pointer to path field (full path to ELF)
+PAYLOAD_CODE static inline char *proc_get_path(struct proc *p) {
+  if (!fw_offsets) {
+    return NULL;
+  }
+  return (char *)((uintptr_t)p + fw_offsets->proc_path_offset);
+}
 
 #endif
