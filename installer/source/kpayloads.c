@@ -431,6 +431,10 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
   // 8.00-8.52
   } else if (fw_version == 900) {
     // ChendoChap's patches from pOOBs4
+    kmem = (uint8_t *)&kernel_ptr[0x00626874]; // veriPatch
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
     kmem = (uint8_t *)&kernel_ptr[0x00000ACD]; // bcopy
     kmem[0] = 0xEB;
 
@@ -457,6 +461,24 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
 
     // stop sysVeri from causing a delayed panic on suspend
     kmem = (uint8_t *)&kernel_ptr[0x0062715F];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    // patch amd64_syscall() to allow calling syscalls everywhere
+    kmem = (uint8_t *)&kernel_ptr[0x00000490];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004C2];
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B5];
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
@@ -494,6 +516,10 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0x37;
   } else if (fw_version >= 903 && fw_version <= 904) {
     // ChendoChap's patches from pOOBs4
+    kmem = (uint8_t *)&kernel_ptr[0x00624834]; // veriPatch
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
     kmem = (uint8_t *)&kernel_ptr[0x00000ACD]; // bcopy
     kmem[0] = 0xEB;
 
@@ -520,6 +546,24 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
 
     // stop sysVeri from causing a delayed panic on suspend
     kmem = (uint8_t *)&kernel_ptr[0x0062511F];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    // patch amd64_syscall() to allow calling syscalls everywhere
+    kmem = (uint8_t *)&kernel_ptr[0x00000490];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004C2];
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B5];
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
@@ -557,6 +601,10 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0x37;
   } else if (fw_version >= 950 && fw_version <= 960) {
     // ChendoChap's patches from pOOBs4
+    kmem = (uint8_t *)&kernel_ptr[0x00624AE4]; // veriPatch
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
     kmem = (uint8_t *)&kernel_ptr[0x00000ACD]; // bcopy
     kmem[0] = 0xEB;
 
@@ -583,6 +631,24 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
 
     // stop sysVeri from causing a delayed panic on suspend
     kmem = (uint8_t *)&kernel_ptr[0x006253CF];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    // patch amd64_syscall() to allow calling syscalls everywhere
+    kmem = (uint8_t *)&kernel_ptr[0x00000490];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004C2];
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B5];
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
@@ -620,6 +686,10 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0x37;
   } else if (fw_version >= 1000 && fw_version <= 1001) {
     // ChendoChap's patches from pOOBs4
+    kmem = (uint8_t *)&kernel_ptr[0x0061E864]; // veriPatch
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
     kmem = (uint8_t *)&kernel_ptr[0x00000ACD]; // bcopy
     kmem[0] = 0xEB;
 
@@ -646,6 +716,24 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
 
     // stop sysVeri from causing a delayed panic on suspend
     kmem = (uint8_t *)&kernel_ptr[0x0061F14F];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    // patch amd64_syscall() to allow calling syscalls everywhere
+    kmem = (uint8_t *)&kernel_ptr[0x00000490];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004C2];
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B5];
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
@@ -696,6 +784,10 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[1] = 0xE9;
 
     // ChendoChap's patches from pOOBs4
+    kmem = (uint8_t *)&kernel_ptr[0x00627DB4]; // veriPatch
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
     kmem = (uint8_t *)&kernel_ptr[0x00000ACD]; // bcopy
     kmem[0] = 0xEB;
 
@@ -722,6 +814,24 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
 
     // stop sysVeri from causing a delayed panic on suspend
     kmem = (uint8_t *)&kernel_ptr[0x0062869F];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    // patch amd64_syscall() to allow calling syscalls everywhere
+    kmem = (uint8_t *)&kernel_ptr[0x00000490];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004C2];
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B5];
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
@@ -775,6 +885,10 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[1] = 0xE9;
 
     // ChendoChap's patches from pOOBs4
+    kmem = (uint8_t *)&kernel_ptr[0x00623F64]; // veriPatch
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
     kmem = (uint8_t *)&kernel_ptr[0x00000ACD]; // bcopy
     kmem[0] = 0xEB;
 
@@ -801,6 +915,24 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
 
     // stop sysVeri from causing a delayed panic on suspend
     kmem = (uint8_t *)&kernel_ptr[0x0062484F];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    // patch amd64_syscall() to allow calling syscalls everywhere
+    kmem = (uint8_t *)&kernel_ptr[0x00000490];
+    kmem[0] = 0x00;
+    kmem[1] = 0x00;
+    kmem[2] = 0x00;
+    kmem[3] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004C2];
+    kmem[0] = 0xEB;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
+    kmem[0] = 0xEB;
+    kmem[1] = 0x00;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000004B5];
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
