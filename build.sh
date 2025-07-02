@@ -30,7 +30,6 @@ fi
       break
     fi
   done
-fi
 
 if [ "$SKIP_DOWNLOAD" = false ]; then
   f="plugins.zip"
