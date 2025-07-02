@@ -48,6 +48,8 @@ done
 
 cd ..
 
+xxd -i "hen.ini" | sed 's/^unsigned /static const unsigned /' > "installer/source/hen.ini.inc.c"
+
 cd installer
 make clean
 make
