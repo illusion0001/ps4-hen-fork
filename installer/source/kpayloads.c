@@ -352,11 +352,10 @@ static int kpayload_install_payload(struct thread *td, struct kpayload_install_p
   return payload_entrypoint(fw_version, config);
 }
 
-// HACK: Fix missing/bad/conflicting exploit patches for supported FWs //////////////////////////////////////////////////////
+// HACK: Fix missing/bad/conflicting exploit patches for supported FWs
 // Lua+Lapse and PSFree+Lapse have the correct patch from 7.00-12.02, every FW *should* match these
 // Try to get these patches fixed/added upstream if possible
 // It's hard to tell with some of them because so many people forked/tweaked it
-//   - Try to get it fixed in the "official" release and assume hosts will update
 static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_args *args) {
   UNUSED(td);
   void *kernel_base;
@@ -374,7 +373,6 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
   uint64_t cr0 = readCr0();
   writeCr0(cr0 & ~X86_CR0_WP);
 
-  // patch sys_dynlib_dlsym() to allow dynamic symbol resolution everywhere
   if (fw_version >= 505 && fw_version <= 507) {
     // Fixes
     //   - [X] PS4-5.05-Kernel-Exploit
@@ -564,11 +562,11 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     // patch vm_map_protect() (called by sys_mprotect()) to allow rwx mappings
     kmem = (uint8_t *)&kernel_ptr[0x00451DB8];
     kmem[0] = 0x0F;
-    kmem[0] = 0x85;
-    kmem[0] = 0x00;
-    kmem[1] = 0x00;
+    kmem[1] = 0x85;
     kmem[2] = 0x00;
     kmem[3] = 0x00;
+    kmem[4] = 0x00;
+    kmem[5] = 0x00;
 
     // TODO: Description of this patch. patch sys_dynlib_load_prx()
     kmem = (uint8_t *)&kernel_ptr[0x001D83CE];
@@ -598,10 +596,31 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0x37;
   } else if (fw_version >= 700 && fw_version <= 702) {
     // Fixes
-    //   - [ ] ps4jb2
+    //   - [X] ps4jb2
     //   - [X] ps4-ipv6-uaf
-    //     - [ ] Unpatch SysVeri? Or port changes to other FWs?
     //   - [X] pppwn
+
+    // Unpatch SysVeri
+    kmem = (uint8_t *)&kernel_ptr[0x0063A160];
+    kmem[0] = 0x55;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0063ACC0];
+    kmem[0] = 0x8B;
+    kmem[1] = 0x05;
+    kmem[2] = 0x32;
+    kmem[3] = 0x09;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00639F10];
+    kmem[0] = 0x55;
+    kmem[1] = 0x48;
+    kmem[2] = 0x89;
+    kmem[3] = 0xE5;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0063A6E0];
+    kmem[0] = 0x55;
+    kmem[1] = 0x48;
+    kmem[2] = 0x89;
+    kmem[3] = 0xE5;
 
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x0063ACCE]; // veriPatch
@@ -652,9 +671,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
-    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
-    kmem[0] = 0xEB;
-    kmem[1] = 0x00;
+    kmem = (uint8_t *)&kernel_ptr[0x000004B2];
+    kmem[0] = 0x48;
+    kmem[1] = 0x3B;
+    kmem[2] = 0x90;
+    kmem[3] = 0xE8;
+    kmem[4] = 0x00;
+    kmem[5] = 0x00;
+    kmem[6] = 0x00;
+    kmem[7] = 0xEB;
+    kmem[8] = 0x00;
 
     // patch sys_setuid() to allow freely changing the effective user ID
     kmem = (uint8_t *)&kernel_ptr[0x00087B70];
@@ -670,11 +696,11 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     // patch vm_map_protect() (called by sys_mprotect()) to allow rwx mappings
     kmem = (uint8_t *)&kernel_ptr[0x00264C08];
     kmem[0] = 0x0F;
-    kmem[0] = 0x85;
-    kmem[0] = 0x00;
-    kmem[1] = 0x00;
+    kmem[1] = 0x85;
     kmem[2] = 0x00;
     kmem[3] = 0x00;
+    kmem[4] = 0x00;
+    kmem[5] = 0x00;
 
     // TODO: Description of this patch. patch sys_dynlib_load_prx()
     kmem = (uint8_t *)&kernel_ptr[0x00094EC1];
@@ -704,7 +730,7 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0x37;
   } else if (fw_version >= 750 && fw_version <= 755) {
     // Fixes
-    //   - [ ] ps4jb2
+    //   - [X] ps4jb2
     //   - [X] pppwn
 
     // ChendoChap's patches from pOOBs4
@@ -756,20 +782,36 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
-    kmem = (uint8_t *)&kernel_ptr[0x000004B9];
-    kmem[0] = 0xEB;
-    kmem[1] = 0x00;
+    kmem = (uint8_t *)&kernel_ptr[0x000004B2];
+    kmem[0] = 0x48;
+    kmem[1] = 0x3B;
+    kmem[2] = 0x90;
+    kmem[3] = 0xE8;
+    kmem[4] = 0x00;
+    kmem[5] = 0x00;
+    kmem[6] = 0x00;
+    kmem[7] = 0xEB;
+    kmem[8] = 0x00;
 
     // patch sys_setuid() to allow freely changing the effective user ID
-    kmem = (uint8_t *)&kernel_ptr[0x0037A327];
-    kmem[0] = 0xEB;
+    kmem = (uint8_t *)&kernel_ptr[0x0037A320];
+    kmem[0] = 0xE8;
+    kmem[1] = 0x8B;
+    kmem[2] = 0x49;
+    kmem[3] = 0x06;
+    kmem[4] = 0x00;
+    kmem[5] = 0x85;
+    kmem[6] = 0xC0;
+    kmem[7] = 0xEB;
 
     // patch vm_map_protect() (called by sys_mprotect()) to allow rwx mappings
-    kmem = (uint8_t *)&kernel_ptr[0x003014CA];
-    kmem[0] = 0x00;
-    kmem[1] = 0x00;
+    kmem = (uint8_t *)&kernel_ptr[0x003014C8];
+    kmem[0] = 0x0F;
+    kmem[1] = 0x85;
     kmem[2] = 0x00;
     kmem[3] = 0x00;
+    kmem[4] = 0x00;
+    kmem[5] = 0x00;
 
     // TODO: Description of this patch. patch sys_dynlib_load_prx()
     kmem = (uint8_t *)&kernel_ptr[0x00451E04];
