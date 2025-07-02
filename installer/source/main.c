@@ -23,6 +23,10 @@ static void set_target_id(char *tid) {
   char buffer[0x100] = {0};
   int buffer_size = sizeof(buffer);
   switch (hex) {
+  case 0:
+  {
+    break;
+  }
   case 0x80:
     snprintf(buffer, buffer_size, "Diagnostic");
     break;
@@ -79,7 +83,7 @@ static void set_target_id(char *tid) {
     return;
   }
 
-  if (spoof_target_id(hex) != 0) {
+  if (hex > 0 && spoof_target_id(hex) != 0) {
     printf_notification("ERROR: Unable to spoof target ID");
     return;
   }
