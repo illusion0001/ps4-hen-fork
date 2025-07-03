@@ -537,7 +537,7 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[0] = 0xEB;
     kmem[1] = 0x00;
 
-    kmem = (uint8_t *)&kernel_ptr[0x000004B1];
+    kmem = (uint8_t *)&kernel_ptr[0x000004B2];
     kmem[0] = 0x48;
     kmem[1] = 0x3B;
     kmem[2] = 0x90;
