@@ -107,6 +107,13 @@ int _main(struct thread *td) {
   // Jailbreak the process
   jailbreak();
 
+  // Use temp file to prevent re-running HEN
+  if (file_exists("/user/temp/hen.installed")) {
+    printf_notification("HEN is already installed. Skipping...");
+    return 0;
+  }
+  touch_file("/user/temp/hen.installed");
+
   // Apply all HEN kernel patches
   install_patches();
 
