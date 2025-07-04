@@ -356,6 +356,7 @@ static int kpayload_install_payload(struct thread *td, struct kpayload_install_p
 // Lua+Lapse and PSFree+Lapse have the correct patch from 7.00-12.02, every FW *should* match these
 // Try to get these patches fixed/added upstream if possible
 // It's hard to tell with some of them because so many people forked/tweaked it
+// These fixes can be opinionated/pedantic, but the goal is to have every kernel looking the same post exploit
 static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_args *args) {
   UNUSED(td);
   void *kernel_base;
@@ -622,6 +623,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem[2] = 0x89;
     kmem[3] = 0xE5;
 
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x0002F295];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0002F1A0];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0002F741];
+    kmem[0] = 0xCE;
+
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x0063ACCE]; // veriPatch
     kmem[0] = 0xEB;
@@ -733,6 +744,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     //   - [X] ps4jb2
     //   - [X] pppwn
 
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x0028FA55];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0028F960];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0028FF01];
+    kmem[0] = 0xCE;
+
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x00637394]; // veriPatch
     kmem[0] = 0xEB;
@@ -843,6 +864,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     // Fixes
     //   - [X] pppwn
 
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x0025E415];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0025E320];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x0025E8C1];
+    kmem[0] = 0xCE;
+
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x0062D254]; // veriPatch
     kmem[0] = 0xEB;
@@ -930,6 +961,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
   } else if (fw_version >= 850 && fw_version <= 852) {
     // Fixes
     //   - [X] pppwn
+
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x003A4345];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x003A4250];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x003A47F1];
+    kmem[0] = 0xCE;
 
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x00624674]; // veriPatch
@@ -1020,6 +1061,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     //   - [X] pOOBs4
     //   - [X] pppwn
 
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x00271705];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00271611];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00271BB1];
+    kmem[0] = 0xCE;
+
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x00626874]; // veriPatch
     kmem[0] = 0xEB;
@@ -1107,6 +1158,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
   } else if (fw_version >= 903 && fw_version <= 904) {
     // Fixes
     //   - [X] pppwn
+
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x00271385];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00271290];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00271831];
+    kmem[0] = 0xCE;
 
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x00624834]; // veriPatch
@@ -1196,6 +1257,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     // Fixes
     //   - [X] pppwn
 
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x00201F15];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00201E20];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x002023C1];
+    kmem[0] = 0xCE;
+
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x00624AE4]; // veriPatch
     kmem[0] = 0xEB;
@@ -1284,6 +1355,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     // Fixes
     //   - [X] pppwn
 
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x00472F75];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00472E81];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x00473421];
+    kmem[0] = 0xCE;
+
     // ChendoChap's patches from pOOBs4
     kmem = (uint8_t *)&kernel_ptr[0x0061E864]; // veriPatch
     kmem[0] = 0xEB;
@@ -1371,6 +1452,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
   } else if (fw_version >= 1050 && fw_version <= 1071) {
     // Fixes
     //   - [X] pppwn
+
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x000D75C5];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000D74D0];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x000D7A71];
+    kmem[0] = 0xCE;
 
     // LightningMods's additional dlsym patches
     kmem = (uint8_t *)&kernel_ptr[0x213013]; // skip check 1
@@ -1475,6 +1566,16 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
   } else if (fw_version == 1100) {
     // Fixes
     //   - [X] pppwn
+
+    // TODO: Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    kmem = (uint8_t *)&kernel_ptr[0x002DE045];
+    kmem[0] = 0xC7;
+
+    kmem = (uint8_t *)&kernel_ptr[0x002DDF51];
+    kmem[0] = 0xC6;
+
+    kmem = (uint8_t *)&kernel_ptr[0x002DE4F1];
+    kmem[0] = 0xCE;
 
     // LightningMods's additional dlsym patches
     kmem = (uint8_t *)&kernel_ptr[0x001E4C33]; // skip check 1
