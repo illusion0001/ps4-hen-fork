@@ -1065,7 +1065,7 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem = (uint8_t *)&kernel_ptr[0x00271705];
     kmem[0] = 0xC7;
 
-    kmem = (uint8_t *)&kernel_ptr[0x00271611];
+    kmem = (uint8_t *)&kernel_ptr[0x00271610];
     kmem[0] = 0xC6;
 
     kmem = (uint8_t *)&kernel_ptr[0x00271BB1];
@@ -1359,7 +1359,7 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem = (uint8_t *)&kernel_ptr[0x00472F75];
     kmem[0] = 0xC7;
 
-    kmem = (uint8_t *)&kernel_ptr[0x00472E81];
+    kmem = (uint8_t *)&kernel_ptr[0x00472E80];
     kmem[0] = 0xC6;
 
     kmem = (uint8_t *)&kernel_ptr[0x00473421];
@@ -1571,7 +1571,7 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     kmem = (uint8_t *)&kernel_ptr[0x002DE045];
     kmem[0] = 0xC7;
 
-    kmem = (uint8_t *)&kernel_ptr[0x002DDF51];
+    kmem = (uint8_t *)&kernel_ptr[0x002DDF50];
     kmem[0] = 0xC6;
 
     kmem = (uint8_t *)&kernel_ptr[0x002DE4F1];
