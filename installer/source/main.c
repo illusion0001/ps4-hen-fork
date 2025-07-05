@@ -23,6 +23,10 @@ static void set_target_id(char *tid) {
   char buffer[0x100] = {0};
   int buffer_size = sizeof(buffer);
   switch (hex) {
+  case 0:
+  {
+    break;
+  }
   case 0x80:
     snprintf(buffer, buffer_size, "Diagnostic");
     break;
@@ -79,17 +83,20 @@ static void set_target_id(char *tid) {
     return;
   }
 
-  if (spoof_target_id(hex) != 0) {
+  if (hex > 0 && spoof_target_id(hex) != 0) {
     printf_notification("ERROR: Unable to spoof target ID");
     return;
   }
 
-  printf_notification("Spoofing: %s", buffer);
 }
 
 int _main(struct thread *td) {
   UNUSED(td);
 
+  found_version = 0;
+  const bool kill_ui = true;
+  const int sleep_sec = kill_ui ? 5 : 1;
+  const int u_to_sec = 1000 * 1000;
   initKernel();
   initLibc();
 
@@ -107,12 +114,46 @@ int _main(struct thread *td) {
   // Jailbreak the process
   jailbreak();
 
+  // Use temp file to prevent re-running HEN
+  if (file_exists(IS_INSTALLED_PATH)) {
+    printf_notification("HEN is already installed. Skipping...");
+    return 0;
+  }
+  touch_file(IS_INSTALLED_PATH);
+
   // Apply all HEN kernel patches
   install_patches();
 
   // Initialize config
+  // Write current config if it doesn't exist yet
+  if (!file_exists(HDD_INI_PATH)) {
+    upload_ini(HDD_INI_PATH);
+  }
   struct configuration config;
   init_config(&config);
+
+  const bool ver_match = config.config_version != DEFAULT_CONFIG_VERSION;
+  const bool found_ver = found_version == 0;
+  if (file_exists(HDD_INI_PATH) && (ver_match || found_ver)) {
+    const char *reason = " unknown!";
+    if (ver_match)    {
+      reason = " out of date!";
+    } else if (found_ver) {
+      reason = " not found!";
+    }
+    printf_debug("config version not match\n");
+    printf_debug("config.config_version: %d\n", config.config_version);
+    printf_debug("found_version: %d\n", found_version);
+    upload_ini(HDD_INI_PATH);
+    bool found_usb = file_exists(USB_INI_PATH) == 1;
+    if (found_usb) {
+      upload_ini(USB_INI_PATH);
+    }
+    printf_notification("Config version (%d/%d)%s\n"
+                        "Updating settings file on %s%s...", config.config_version, DEFAULT_CONFIG_VERSION, reason, "HDD", found_usb ? " and USB" : "");
+    // sleep so user can see welcome message before shellui restarts
+    usleep(sleep_sec * u_to_sec);
+  }
 
   if (config.exploit_fixes) {
     printf_debug("Applying exploit fixes...\n");
@@ -137,7 +178,6 @@ int _main(struct thread *td) {
   if (config.nobd_patches) {
     printf_debug("Installing NoBD patches...\n");
     no_bd_patch();
-    printf_notification("NoBD patches enabled");
   }
 
   // Install and run kpayload
@@ -156,10 +196,6 @@ int _main(struct thread *td) {
 
   printf_notification("Welcome to HEN %s", VERSION);
 
-  // for future use
-  const bool kill_ui = false;
-  const int sleep_sec = kill_ui ? 4 : 1;
-  const int u_to_sec = 1000 * 1000;
   const char *proc = kill_ui ? "SceShellUI" : NULL;
   if (kill_ui) {
     usleep(sleep_sec * u_to_sec);
