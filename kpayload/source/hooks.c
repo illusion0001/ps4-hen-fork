@@ -3,6 +3,7 @@
 //
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "amd_helper.h"
 #include "elf_helper.h"
@@ -271,7 +272,7 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
   // https://github.com/OpenOrbis/mira-project/blob/d8cc5790f08f93267354c2370eb3879edba0aa98/kernel/src/Plugins/Substitute/Substitute.cpp#L1003
   const char *titleid = td->td_proc->titleid;
   const char *p = args->prx_path ? args->prx_path : "";
-  printf("%s td_name %s titleid %s prx %s\n", __FUNCTION__, td->td_name, titleid, p);
+  //printf("%s td_name %s titleid %s prx %s\n", __FUNCTION__, td->td_name, titleid, p);
   const uint8_t jmp[] = {0xff, 0x25, 0x00, 0x00, 0x00, 0x00};
   if (strstr(p, "/app0/sce_module/libc.prx")) {
     const int handle_out = args->handle_out ? *args->handle_out : 0;
@@ -288,11 +289,23 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
       proc_rw_mem(td->td_proc, (void *)init_env_ptr, sizeof(jmp), (void *)jmp, 0, 1);
       proc_rw_mem(td->td_proc, (void *)(init_env_ptr + sizeof(jmp)), sizeof(plugin_load_ptr), &plugin_load_ptr, 0, 1);
     }
-  } else if (strstr(p, "/common/lib/libSceSysmodule.sprx") && strstr(td->td_name, "ScePartyDaemonMain")) {
+  }
+  const bool isPartyDaemon = strstr(td->td_name, "ScePartyDaemonMain") != NULL;
+  const bool isShellUI = strstr(td->td_name, "SceShellUIMain") != NULL;
+  //printf("%d %d\n", isPartyDaemon, isShellUI);
+  if (strstr(p, "/common/lib/libSceSysmodule.sprx") && (isPartyDaemon || isShellUI))
+  {
     // dummy process to load server prx into
     struct dynlib_load_prx_args my_args = {};
     int handle = 0;
-    my_args.prx_path = PRX_SERVER_PATH;
+    if (isPartyDaemon)
+    {
+      my_args.prx_path = PRX_SERVER_PATH;
+    }
+    else if (isShellUI)
+    {
+      my_args.prx_path = PRX_MONO_PATH;
+    }
     my_args.handle_out = &handle;
     sys_dynlib_load_prx(td, &my_args);
     uintptr_t init_env_ptr = 0;
