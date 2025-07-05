@@ -4,6 +4,7 @@
 #define TARGET_ID_SIZE 4 // eg. 0x84
 
 struct configuration {
+  int config_version;
   int exploit_fixes;
   int mmap_patches;
   int block_updates;

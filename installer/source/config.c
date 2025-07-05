@@ -19,14 +19,18 @@
 
 #define MATCH(n) strcmp(name, n) == 0
 
+void upload_ini(const char* path) {
+  write_blob(path, hen_ini, hen_ini_len);
+}
+
 static void upload_ver(void) {
   write_blob(BASE_PATH "/" VERSION_TXT, VERSION, sizeof(VERSION) - 1);
-  write_blob(HDD_INI_PATH, hen_ini, hen_ini_len);
 }
 
 // Helper function to set all configuration values to their defaults
 static void set_config_defaults(struct configuration *config) {
   memset(config, '\0', sizeof(*config));
+  config->config_version = DEFAULT_CONFIG_VERSION;
   config->exploit_fixes = DEFAULT_EXPLOIT_FIXES;
   config->mmap_patches = DEFAULT_MMAP_PATCHES;
   config->block_updates = DEFAULT_BLOCK_UPDATES;
@@ -52,12 +56,26 @@ static int set_bool_config(const char *name, const char *value, int *config_fiel
   }
 }
 
+static int set_int_config(const char *name, const char *value, int *config_field, int default_value) {
+  int parsed_v = 0;
+  if (sscanf(value, "%d", &parsed_v) != 1) {
+    printf_notification("ERROR: Malformed %s", name);
+  } else {
+    *config_field = parsed_v;
+  }
+}
+
+int found_version = 0;
+
 // The return values are flipped in this function compared to the rest of this
 // file because the INI lib expects it that way
 static int config_handler(void *config, const char *name, const char *value) {
   struct configuration *config_p = (struct configuration *)config;
 
-  if (MATCH("exploit_fixes")) {
+  if (MATCH("config_version")) {
+    found_version = 1;
+    return set_int_config("config_version", value, &config_p->config_version, DEFAULT_CONFIG_VERSION);
+  } else if (MATCH("exploit_fixes")) {
     return set_bool_config("exploit_fixes", value, &config_p->exploit_fixes, DEFAULT_EXPLOIT_FIXES);
   } else if (MATCH("mmap_patches")) {
     return set_bool_config("mmap_patches", value, &config_p->mmap_patches, DEFAULT_MMAP_PATCHES);
