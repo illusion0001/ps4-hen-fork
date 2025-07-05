@@ -10,5 +10,6 @@
 #define PRX_LOADER_PATH BASE_PATH "/plugin_loader.prx"
 #define PRX_SERVER_PATH BASE_PATH "/plugin_server.prx"
 #define PRX_MONO_PATH BASE_PATH "/plugin_mono.prx"
+#define IS_INSTALLED_PATH "/user/temp/hen.installed"
 
 #endif
