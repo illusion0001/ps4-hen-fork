@@ -464,7 +464,9 @@ error:
 }
 
 PAYLOAD_CODE void apply_patches() {
-  shellui_patch();
+  if (0) {
+    shellui_patch();
+  }
   remoteplay_patch();
   shellcore_patch();
 }
