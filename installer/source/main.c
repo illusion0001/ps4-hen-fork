@@ -97,6 +97,11 @@ int _main(struct thread *td) {
   const int u_to_sec = 1000 * 1000;
   initKernel();
   initLibc();
+  initModule();
+  const int ORBIS_SYSMODULE_ZLIB = 0x00C5;
+  if (sceSysmoduleLoadModule(ORBIS_SYSMODULE_ZLIB) == 0) {
+    initZlib();
+  }
 
 #ifdef DEBUG_SOCKET
   initNetwork();
