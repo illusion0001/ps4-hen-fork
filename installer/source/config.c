@@ -63,6 +63,7 @@ static int set_int_config(const char *name, const char *value, int *config_field
   } else {
     *config_field = parsed_v;
   }
+  return 1;
 }
 
 int found_version = 0;
