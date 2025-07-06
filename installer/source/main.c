@@ -186,7 +186,11 @@ int _main(struct thread *td) {
 
   if (config.upload_prx) {
     printf_debug("Writing plugin PRXs to disk...\n");
-    upload_prx_to_disk();
+    int r = upload_prx_to_disk();
+    if (r)
+    {
+      printf_notification("failed to decompress bundled plugins to disk\n");
+    }
   }
 
   if (!config.skip_patches) {
