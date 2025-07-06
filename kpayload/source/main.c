@@ -365,6 +365,10 @@ PAYLOAD_CODE int my_entrypoint(uint16_t fw_version_arg, struct configuration con
     install_syscall_hooks();
   }
 
+  if (config.nobd_patches) {
+      install_nobd_syscall_hooks();
+  }
+
   return 0;
 }
 

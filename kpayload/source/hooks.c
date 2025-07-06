@@ -320,7 +320,52 @@ PAYLOAD_CODE int sys_dynlib_load_prx_hook(struct thread *td, struct dynlib_load_
   }
   return r;
 }
+PAYLOAD_CODE void* sys_jailbreak(struct thread *td) {
 
+    struct ucred* cred = td->td_proc->p_ucred;
+    struct filedesc* fd = td->td_proc->p_fd;
+
+    void *td_ucred = *(void **)(((char *)td) + 304); // p_ucred == td_ucred
+
+
+    const uint64_t kernel_ptr = getkernbase(fw_offsets->XFAST_SYSCALL_addr);
+    void** got_prison0 = (void**)((uint8_t*)kernel_ptr + fw_offsets->PRISON0_addr);
+    void** got_rootvnode = (void**)((uint8_t*)kernel_ptr + fw_offsets->ROOTVNODE_addr);
+ 
+    cred->cr_uid = 0;
+    cred->cr_ruid = 0;
+    cred->cr_rgid = 0;
+    cred->cr_groups[0] = 0;
+    cred->cr_prison = *got_prison0;
+    fd->fd_rdir = fd->fd_jdir = *got_rootvnode;
+ 
+    // sceSblACMgrIsSystemUcred
+    uint64_t *sonyCred = (uint64_t *)(((char *)td_ucred) + 96);
+    *sonyCred = 0xFFFFFFFFFFFFFFFFULL;
+
+    // sceSblACMgrGetDeviceAccessType
+    uint64_t *sceProcType = (uint64_t *)(((char *)td_ucred) + 88);
+    *sceProcType = 0x3801000000000013; // Max access
+
+    // sceSblACMgrHasSceProcessCapability
+    uint64_t *sceProcCap = (uint64_t *)(((char *)td_ucred) + 104);
+    *sceProcCap = 0xFFFFFFFFFFFFFFFFULL; // Sce Process
+
+    return 0;
+}
+
+PAYLOAD_CODE void install_nobd_syscall_hooks(void) {
+   uint64_t flags, cr0;
+
+  cr0 = readCr0();
+  writeCr0(cr0 & ~X86_CR0_WP);
+  flags = intr_disable();
+
+  install_syscall(9, sys_jailbreak);
+
+  intr_restore(flags);
+  writeCr0(cr0);
+}
 PAYLOAD_CODE void install_syscall_hooks(void) {
   uint64_t flags, cr0;
 
