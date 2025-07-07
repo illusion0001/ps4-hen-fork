@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#define DEFAULT_EXPLOIT_FIXES 0
+#define DEFAULT_EXPLOIT_FIXES 1
 #define DEFAULT_MMAP_PATCHES 1
 #define DEFAULT_BLOCK_UPDATES 1
 #define DEFAULT_DISABLE_ASLR 1
