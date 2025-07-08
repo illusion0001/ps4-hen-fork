@@ -345,8 +345,8 @@ struct sys_jailbreak_filedesc {
 };
 
 PAYLOAD_CODE void *sys_jailbreak(struct thread *td) {
-  struct sys_jailbreak_ucred *cred = td->td_proc->p_ucred;
-  struct sys_jailbreak_filedesc *fd = td->td_proc->p_fd;
+  struct sys_jailbreak_ucred *cred = (struct sys_jailbreak_ucred *)td->td_proc->p_ucred;
+  struct sys_jailbreak_filedesc *fd = (struct sys_jailbreak_filedesc *)td->td_proc->p_fd;
 
   void *td_ucred = *(void **)(((char *)td) + 304); // p_ucred == td_ucred
 
