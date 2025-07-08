@@ -374,6 +374,12 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
   uint64_t cr0 = readCr0();
   writeCr0(cr0 & ~X86_CR0_WP);
 
+  // TODO:
+  // 4.74                         // PS4-5.05-Kernel-Exploit
+  // 5.00, 5.01, 5.03             // PS4-5.05-Kernel-Exploit, ps4-ipv6-uaf
+  // 5.50, 5.53, 5.55, 5.56       // ps4-ipv6-uaf
+  // 6.00, 6.02, 6.20, 6.50, 6.51 // ps4-ipv6-uaf
+  // 6.70, 6.71                   // ps4-ipv6-uaf, ps4jb2
   if (fw_version >= 505 && fw_version <= 507) {
     // Fixes
     //   - [X] PS4-5.05-Kernel-Exploit
