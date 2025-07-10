@@ -151,6 +151,8 @@ int init_config(struct configuration *config) {
     } else {
       ret = 0;
     }
+  } else {
+    upload_ini(HDD_INI_PATH);
   }
 
   return ret;

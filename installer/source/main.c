@@ -125,10 +125,6 @@ int _main(struct thread *td) {
   install_patches();
 
   // Initialize config
-  // Write current config if it doesn't exist yet
-  if (!file_exists(HDD_INI_PATH)) {
-    upload_ini(HDD_INI_PATH);
-  }
   struct configuration config;
   init_config(&config);
 
