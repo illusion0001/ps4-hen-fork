@@ -23,7 +23,7 @@ const struct kpayload_offsets offsets_500 PAYLOAD_RDATA = {
 
   // common
   .memcmp_addr                     = 0x00050AC0,
-  ._sx_xlock_addr                  = 0x000F5E00,
+  ._sx_xlock_addr                  = 0x000F5B20,
   ._sx_xunlock_addr                = 0x000F5EC0,
   .malloc_addr                     = 0x0010E140,
   .free_addr                       = 0x0010E350,
