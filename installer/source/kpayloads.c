@@ -1567,7 +1567,7 @@ static int kpayload_exploit_fixes(struct thread *td, struct kpayload_firmware_ar
     // Fixes
     //   - [X] pppwn
 
-    // TODO: Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
+    // Unpatch extra bytes from copyin, copyout, and copinstr (pppwn)
     kmem = (uint8_t *)&kernel_ptr[0x002DE045];
     kmem[0] = 0xC7;
 

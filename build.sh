@@ -9,16 +9,15 @@ if [ "$(id -u)" -eq 0 ] && grep -qi ubuntu /etc/os-release; then
   apt-get install -y --no-install-recommends ca-certificates curl unzip xxd
 fi
 
-cd kpayload
-make clean
+pushd kpayload > /dev/null
 make
-cd ..
+popd > /dev/null
 
 mkdir -p tmp
-cd tmp
+pushd tmp > /dev/null
 
 # known bundled plugins
-PRX_FILES="plugin_bootloader.prx plugin_loader.prx plugin_server.prx"
+PRX_FILES="plugin_bootloader.prx plugin_loader.prx plugin_mono.prx plugin_server.prx"
 
 SKIP_DOWNLOAD=false
 if [ -f plugins.zip ]; then
@@ -42,18 +41,17 @@ fi
 # need to use translation units to force rebuilds
 # including as headers doesn't do it
 for file in *.prx; do
-  echo $file
+  echo "${file}"
   xxd -i "$file" | sed 's/^unsigned /static const unsigned /' > "../installer/source/${file}.inc.c"
 done
 
-cd ..
+popd > /dev/null
 
 xxd -i "hen.ini" | sed 's/^unsigned /static const unsigned /' > "installer/source/hen.ini.inc.c"
 
-cd installer
-make clean
+pushd installer > /dev/null
 make
-cd ..
+popd > /dev/null
 
 rm -f hen.bin
 cp installer/installer.bin hen.bin

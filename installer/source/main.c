@@ -24,9 +24,7 @@ static void set_target_id(char *tid) {
   int buffer_size = sizeof(buffer);
   switch (hex) {
   case 0:
-  {
     break;
-  }
   case 0x80:
     snprintf(buffer, buffer_size, "Diagnostic");
     break;
@@ -87,7 +85,6 @@ static void set_target_id(char *tid) {
     printf_notification("ERROR: Unable to spoof target ID");
     return;
   }
-
 }
 
 int _main(struct thread *td) {
@@ -136,7 +133,7 @@ int _main(struct thread *td) {
   const bool found_ver = found_version == 0;
   if (file_exists(HDD_INI_PATH) && (ver_match || found_ver)) {
     const char *reason = " unknown!";
-    if (ver_match)    {
+    if (ver_match) {
       reason = " out of date!";
     } else if (found_ver) {
       reason = " not found!";
