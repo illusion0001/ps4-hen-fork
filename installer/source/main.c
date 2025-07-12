@@ -138,9 +138,11 @@ int _main(struct thread *td) {
     printf_debug("config version not match\n");
     printf_debug("config.config_version: %d\n", config.config_version);
     printf_debug("found_version: %d\n", found_version);
+    unlink(HDD_INI_PATH);
     upload_ini(HDD_INI_PATH);
     bool found_usb = file_exists(USB_INI_PATH) == 1;
     if (found_usb) {
+      unlink(USB_INI_PATH);
       upload_ini(USB_INI_PATH);
     }
     printf_notification("Config version (%d/%d)%s\n"
