@@ -5,7 +5,7 @@ pushd kpayload > /dev/null
 make clean
 popd > /dev/null
 
-rm -rf tmp
+rm -rf tmp/*
 
 pushd installer > /dev/null
 make clean
