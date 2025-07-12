@@ -11,6 +11,7 @@
 #include "path.h"
 #include "plugins.h"
 #include "version.h"
+#include "patch.h"
 
 // TODO: Where should this go? `common.c` doesn't feel right
 // Apply target ID spoofing if configured
@@ -186,6 +187,10 @@ int _main(struct thread *td) {
   if (config.upload_prx) {
     printf_debug("Writing plugin PRXs to disk...\n");
     upload_prx_to_disk();
+  }
+
+  if (!config.skip_patches) {
+    InstallShellCoreCodeForAppinfo();
   }
 
   printf_notification("Welcome to HEN %s", VERSION);
