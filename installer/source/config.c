@@ -20,6 +20,7 @@
 #define MATCH(n) strcmp(name, n) == 0
 
 void upload_ini(const char *path) {
+  unlink(path);
   write_blob(path, hen_ini, hen_ini_len);
 }
 
