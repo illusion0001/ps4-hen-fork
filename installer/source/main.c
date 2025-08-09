@@ -214,7 +214,7 @@ int _main(struct thread *td) {
 
   // this was chosen because SceShellCore will try to restart this daemon if it crashes
   // or manually killed in this case
-  if (config.enable_plugins) {
+  if (config.enable_plugins && file_exists(PRX_SERVER_PATH)) {
     kill_proc("ScePartyDaemon");
   }
   // SceShellUI is also monitored by SceShellCore
