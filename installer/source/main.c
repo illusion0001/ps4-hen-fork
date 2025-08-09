@@ -211,7 +211,7 @@ int _main(struct thread *td) {
   SckClose(DEBUG_SOCK);
 #endif
 
-  usleep(sleep_sec * u_to_sec);
+  usleep(kill_ui ? sleep_sec * u_to_sec : 1);
   // this was chosen because SceShellCore will try to restart this daemon if it crashes
   // or manually killed in this case
   kill_proc("ScePartyDaemon");
