@@ -10,6 +10,7 @@
 #include "plugin_server.prx.inc.c"
 #include "plugin_mono.prx.inc.c"
 #include "plugin_shellcore.prx.inc.c"
+#include "plugin_game_patch.prx.inc.c"
 
 void upload_prx_to_disk(void) {
   write_blob(PRX_BOOTLOADER_PATH, plugin_bootloader_prx, plugin_bootloader_prx_len);
@@ -17,4 +18,5 @@ void upload_prx_to_disk(void) {
   write_blob(PRX_SERVER_PATH, plugin_server_prx, plugin_server_prx_len);
   write_blob(PRX_MONO_PATH, plugin_mono_prx, plugin_mono_prx_len);
   write_blob(PRX_SHELLCORE_PATH, plugin_shellcore_prx, plugin_shellcore_prx_len);
+  write_blob(PRX_GAMEPATCH_PATH, plugin_game_patch_prx, plugin_game_patch_prx_len);
 }

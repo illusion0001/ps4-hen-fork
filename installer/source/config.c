@@ -124,8 +124,15 @@ static int config_handler(void *config, const char *name, const char *value) {
 
 int init_config(struct configuration *config) {
   // Create HEN directory, if it doesn't already exist
-  if (!dir_exists(BASE_PATH)) {
-    mkdir(BASE_PATH, 0777);
+  static const char* path_list[] = {
+    BASE_PATH,
+    BASE_USER_PLUGINS_PATH,
+  };
+  for (size_t i = 0; i < _countof(path_list); i++)
+  {
+    if (!dir_exists(path_list[i])) {
+      mkdir(path_list[i], 0777);
+    }
   }
 
   upload_ver();
